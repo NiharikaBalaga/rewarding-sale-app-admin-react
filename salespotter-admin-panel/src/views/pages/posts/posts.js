@@ -128,64 +128,73 @@ function Posts() {
                         data={dataTable}
                         keyField="name"
                         columns={[
+                            /* Product name */
                             {
-                                dataField: "name",
-                                text: "Product name",
-                                sort: true,
-                                formatter: (cell, row, rowIndex) => (
-                                  <div>
-                                      {rowIndex % 2 === 0 ? (
-                                          <img
-                                          alt="..."
-                                          className="avatar rounded-circle mr-3"
-                                          src={require("assets/img/theme/team-3.jpg")}
-                                          />
-                                      ) : (
-                                          <img
-                                          alt="..."
-                                          className="avatar rounded-circle mr-3"
-                                          src={require("assets/img/theme/team-4.jpg")}
-                                          />
-                                      )}
-                                      <b>{cell}</b>
-                                  </div>
-                                )
-                                },
+                              dataField: "name",
+                              text: "Product name",
+                              sort: true,
+                              formatter: (cell, row, rowIndex) => (
+                                <div>
+                                    {rowIndex % 2 === 0 ? (
+                                        <img
+                                        alt="..."
+                                        className="avatar rounded-circle mr-3"
+                                        src={require("assets/img/theme/team-3.jpg")}
+                                        />
+                                    ) : (
+                                        <img
+                                        alt="..."
+                                        className="avatar rounded-circle mr-3"
+                                        src={require("assets/img/theme/team-4.jpg")}
+                                        />
+                                    )}
+                                    <b>{cell}</b>
+                                </div>
+                              )
+                            },
+                            /* File name */
                             {
                                 dataField: "position",
                                 text: "File name",
                                 sort: true,
                             },
+                            /* Location */
                             {
                                 dataField: "office",
                                 text: "Location",
                                 sort: true,
                             },
+                            /* Old price */
                             {
                                 dataField: "salary",
                                 text: "Old price",
                                 sort: true,
                             },
+                            /* Old quantity */
                             {
                                 dataField: "age",
                                 text: "Old quantity",
                                 sort: true,
                             },
+                            /* New price */
                             {
                                 dataField: "salary",
                                 text: "New price",
                                 sort: true,
                             },
+                            /* New quantity */
                             {
                                 dataField: "age",
                                 text: "New quantity",
                                 sort: true,
                             },
+                            /* Description */
                             {
                                 dataField: "position",
                                 text: "Description",
                                 sort: true,
                             },
+                            /* Actions */
                             {
                                 dataField: null,
                                 text: "Actions",
@@ -201,19 +210,7 @@ function Posts() {
                                     </NavLink>
                                     <UncontrolledTooltip delay={0} target="tooltip564981685">
                                         Edit post
-                                    </UncontrolledTooltip>
-                                    {/* Block post icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065234"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-ban" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Block post
-                                    </UncontrolledTooltip>
+                                    </UncontrolledTooltip>                                    
                                     {/* Delete post icon */}
                                     <a
                                     className="table-action table-action-delete"

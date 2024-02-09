@@ -128,6 +128,7 @@ function Admins() {
                         data={dataTable}
                         keyField="name"
                         columns={[
+                            /* Name */
                             {
                                 dataField: "name",
                                 text: "Name",
@@ -151,26 +152,19 @@ function Admins() {
                                     </div>
                                 )
                             },
-                            {
-                                dataField: "position",
-                                text: "Password",
-                                sort: true,
-                                formatter: (cell, row) => (
-                                    <div>
-                                        {Array.from(cell).map((char, index) => <span key={index}>*</span>)}
-                                    </div>
-                                )
-                            },
+                            /* Phone number */
                             {
                                 dataField: "office",
                                 text: "Phone number",
                                 sort: true,
                             },
+                            /* Email address */
                             {                    
                                 dataField: "position",
                                 text: "Email address",
                                 sort: true,                                
                             },
+                            /* Status */
                             {                    
                                 text: "Status",
                                 sort: true,
@@ -184,6 +178,7 @@ function Admins() {
                                     </div>
                                     )
                             },
+                            /* Actions */
                             {
                                 dataField: null,
                                 text: "Actions",
@@ -204,12 +199,12 @@ function Admins() {
                                     <a
                                     className="table-action table-action-delete"
                                     href="#pablo"
-                                    id="tooltip601065234"
+                                    id="tooltip601065235"
                                     onClick={(e) => e.preventDefault()}
                                     >
                                         <i className="fas fa-ban" />
                                     </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
+                                    <UncontrolledTooltip delay={0} target="tooltip601065235">
                                         Block admin
                                     </UncontrolledTooltip>
                                     {/* Delete admin icon */}
