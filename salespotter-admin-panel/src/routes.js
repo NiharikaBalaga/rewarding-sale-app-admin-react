@@ -46,6 +46,8 @@ import Admins from "views/pages/admins/admins";
 import UserEdit from "views/pages/users/user-edit";
 import PostEdit from "views/pages/posts/post-edit";
 import AdminEdit from "views/pages/admins/admin-edit";
+import Rewards from "views/pages/rewards/rewards";
+import RewardsEdit from "views/pages/rewards/rewards-edit";
 
 const routes = [
   {  
@@ -70,6 +72,22 @@ const routes = [
     name: "Users Edit",
     icon: "ni ni-single-02 text-primary",
     component: <UserEdit />,
+    layout: "/admin",
+    showInSidebar: false,
+  },
+  {
+    path: "/rewards", 
+    name: "Rewards",
+    icon: "ni ni-trophy text-yellow",    
+    component: <Rewards />,
+    layout: "/admin",
+    showInSidebar: false,
+  },
+  {
+    path: "/rewards-edit", 
+    name: "Rewards",
+    icon: "ni ni-trophy text-yellow",    
+    component: <RewardsEdit />,
     layout: "/admin",
     showInSidebar: false,
   },

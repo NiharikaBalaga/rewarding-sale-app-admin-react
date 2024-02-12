@@ -221,6 +221,14 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
             </NavItem>
             <NavItem>
               <NavLink
+                to="/admin/rewards" tag={Link}
+              >
+                <i className="ni ni-trophy text-primary" />
+                <span className="nav-link-text">Rewards</span>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
                 to="/admin/posts" tag={Link}
               >
                 <i className="ni ni-calendar-grid-58 text-primary" />

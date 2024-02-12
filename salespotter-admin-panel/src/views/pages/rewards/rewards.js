@@ -72,7 +72,7 @@ const pagination = paginationFactory({
 
 const { SearchBar } = Search;
 
-function Users() {
+function Rewards() {
   const [alert, setAlert] = React.useState(null);
   const componentRef = React.useRef(null);
   // this function will copy to clipboard an entire table,
@@ -117,13 +117,13 @@ function Users() {
   return (
     <>
     {alert}
-    <SimpleHeader name="Users" parentName="Users" />
+    <SimpleHeader name="Rewards" parentName="Rewards" />
     <Container className="mt--6" fluid>
         <Row>
             <div className="col">
                 <Card>
                     <CardHeader>
-                        <h3 className="mb-0">Users</h3>
+                        <h3 className="mb-0">Rewards</h3>
                     </CardHeader>
                     <ToolkitProvider
                         data={dataTable}
@@ -152,69 +152,31 @@ function Users() {
                                         <b>{cell}</b>
                                     </div>
                                 )
-                            },
-                            /* Email address */
-                            {
-                                dataField: "position",
-                                text: "Email address",
-                                sort: true,
-                            },
-                            /* Phone number */
-                            {
-                                dataField: "office",
-                                text: "Phone number",
-                                sort: true,
-                            },
-                            /* Created at */
-                            {
-                                dataField: "start_date",
-                                text: "Created at",
-                                sort: true,
                             },                            
-                            /* Status */
-                            {                    
-                                text: "Status",
-                                sort: true,
-                                formatter: (cell, row) => (
-                                    <div>
-                                        {cell}
-                                        <Badge color="" className="badge-dot mr-4">
-                                        <i className="bg-success" />
-                                        <span className="status">Active</span>
-                                        </Badge>
-                                    </div>
-                                )
-                            },
+                            /* Rewards */                           
+                            {
+                              dataField: "age",
+                              text: "Rewards",
+                              sort: true,
+                            },                            
                             /* Actions */
                             {
                                 dataField: null,
                                 text: "Actions",
                                 formatter: (cell, row) => (
                                     <div>
-                                    {/* Edit user icon */}                                    
+                                    {/* Edit reward icon */}                                    
                                     <NavLink
-                                        to="/admin/user-edit"
+                                        to="/admin/rewards-edit"
                                         className="table-action"
                                         id="tooltip564981685"                                        
                                     >
                                         <i className="fas fa-edit" />
                                     </NavLink>
                                     <UncontrolledTooltip delay={0} target="tooltip564981685">
-                                        Edit user
-                                    </UncontrolledTooltip>
-                                    {/* Block user icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065235"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-ban" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065235">
-                                        Block user
-                                    </UncontrolledTooltip>
-                                    {/* Delete user icon */}
+                                        Edit reward
+                                    </UncontrolledTooltip>                                    
+                                    {/* Delete reward icon */}
                                     <a
                                     className="table-action table-action-delete"
                                     href="#pablo"
@@ -224,7 +186,7 @@ function Users() {
                                         <i className="fas fa-trash" />
                                     </a>
                                     <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Delete user
+                                        Delete reward
                                     </UncontrolledTooltip>
                                     </div>
                                 )
@@ -264,4 +226,4 @@ function Users() {
   );
 }
 
-export default Users;
+export default Rewards;
