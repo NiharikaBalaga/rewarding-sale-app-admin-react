@@ -129,6 +129,7 @@ function Users() {
                         data={dataTable}
                         keyField="name"
                         columns={[
+                            /* Name */
                             {
                                 dataField: "name",
                                 text: "Name",
@@ -152,21 +153,25 @@ function Users() {
                                     </div>
                                 )
                             },
+                            /* Email address */
                             {
                                 dataField: "position",
                                 text: "Email address",
                                 sort: true,
                             },
+                            /* Phone number */
                             {
                                 dataField: "office",
                                 text: "Phone number",
                                 sort: true,
                             },
+                            /* Created at */
                             {
                                 dataField: "start_date",
                                 text: "Created at",
                                 sort: true,
-                            },
+                            },                            
+                            /* Status */
                             {                    
                                 text: "Status",
                                 sort: true,
@@ -180,6 +185,7 @@ function Users() {
                                     </div>
                                 )
                             },
+                            /* Actions */
                             {
                                 dataField: null,
                                 text: "Actions",
@@ -200,12 +206,12 @@ function Users() {
                                     <a
                                     className="table-action table-action-delete"
                                     href="#pablo"
-                                    id="tooltip601065234"
+                                    id="tooltip601065235"
                                     onClick={(e) => e.preventDefault()}
                                     >
                                         <i className="fas fa-ban" />
                                     </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
+                                    <UncontrolledTooltip delay={0} target="tooltip601065235">
                                         Block user
                                     </UncontrolledTooltip>
                                     {/* Delete user icon */}

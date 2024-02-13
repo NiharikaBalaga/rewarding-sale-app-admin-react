@@ -41,6 +41,7 @@ import SimpleHeader from "components/Headers/SimpleHeader.js";
 
 import { dataTable } from "variables/general";
 
+
 const pagination = paginationFactory({
   page: 1,
   alwaysShowAllBtns: true,
@@ -71,7 +72,7 @@ const pagination = paginationFactory({
 
 const { SearchBar } = Search;
 
-function Posts() {
+function Rewards() {
   const [alert, setAlert] = React.useState(null);
   const componentRef = React.useRef(null);
   // this function will copy to clipboard an entire table,
@@ -116,102 +117,66 @@ function Posts() {
   return (
     <>
     {alert}
-    <SimpleHeader name="Posts" parentName="Posts" />
+    <SimpleHeader name="Rewards" parentName="Rewards" />
     <Container className="mt--6" fluid>
         <Row>
             <div className="col">
                 <Card>
                     <CardHeader>
-                        <h3 className="mb-0">Posts</h3>
+                        <h3 className="mb-0">Rewards</h3>
                     </CardHeader>
                     <ToolkitProvider
                         data={dataTable}
                         keyField="name"
                         columns={[
-                            /* Product name */
+                            /* Name */
                             {
-                              dataField: "name",
-                              text: "Product name",
+                                dataField: "name",
+                                text: "Name",
+                                sort: true,
+                                formatter: (cell, row, rowIndex) => (
+                                    <div>
+                                        {rowIndex % 2 === 0 ? (
+                                            <img
+                                            alt="..."
+                                            className="avatar rounded-circle mr-3"
+                                            src={require("assets/img/theme/team-1.jpg")}
+                                            />
+                                        ) : (
+                                            <img
+                                            alt="..."
+                                            className="avatar rounded-circle mr-3"
+                                            src={require("assets/img/theme/team-2.jpg")}
+                                            />
+                                        )}
+                                        <b>{cell}</b>
+                                    </div>
+                                )
+                            },                            
+                            /* Rewards */                           
+                            {
+                              dataField: "age",
+                              text: "Rewards",
                               sort: true,
-                              formatter: (cell, row, rowIndex) => (
-                                <div>
-                                    {rowIndex % 2 === 0 ? (
-                                        <img
-                                        alt="..."
-                                        className="avatar rounded-circle mr-3"
-                                        src={require("assets/img/theme/team-3.jpg")}
-                                        />
-                                    ) : (
-                                        <img
-                                        alt="..."
-                                        className="avatar rounded-circle mr-3"
-                                        src={require("assets/img/theme/team-4.jpg")}
-                                        />
-                                    )}
-                                    <b>{cell}</b>
-                                </div>
-                              )
-                            },
-                            /* File name */
-                            {
-                                dataField: "position",
-                                text: "File name",
-                                sort: true,
-                            },
-                            /* Location */
-                            {
-                                dataField: "office",
-                                text: "Location",
-                                sort: true,
-                            },
-                            /* Old price */
-                            {
-                                dataField: "salary",
-                                text: "Old price",
-                                sort: true,
-                            },
-                            /* Old quantity */
-                            {
-                                dataField: "age",
-                                text: "Old quantity",
-                                sort: true,
-                            },
-                            /* New price */
-                            {
-                                dataField: "salary",
-                                text: "New price",
-                                sort: true,
-                            },
-                            /* New quantity */
-                            {
-                                dataField: "age",
-                                text: "New quantity",
-                                sort: true,
-                            },
-                            /* Description */
-                            {
-                                dataField: "position",
-                                text: "Description",
-                                sort: true,
-                            },
+                            },                            
                             /* Actions */
                             {
                                 dataField: null,
                                 text: "Actions",
                                 formatter: (cell, row) => (
                                     <div>
-                                    {/* Edit post icon */}
+                                    {/* Edit reward icon */}                                    
                                     <NavLink
-                                        to="/admin/post-edit"
+                                        to="/admin/rewards-edit"
                                         className="table-action"
                                         id="tooltip564981685"                                        
                                     >
                                         <i className="fas fa-edit" />
                                     </NavLink>
                                     <UncontrolledTooltip delay={0} target="tooltip564981685">
-                                        Edit post
+                                        Edit reward
                                     </UncontrolledTooltip>                                    
-                                    {/* Delete post icon */}
+                                    {/* Delete reward icon */}
                                     <a
                                     className="table-action table-action-delete"
                                     href="#pablo"
@@ -221,7 +186,7 @@ function Posts() {
                                         <i className="fas fa-trash" />
                                     </a>
                                     <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Delete post
+                                        Delete reward
                                     </UncontrolledTooltip>
                                     </div>
                                 )
@@ -261,4 +226,4 @@ function Posts() {
   );
 }
 
-export default Posts;
+export default Rewards;
