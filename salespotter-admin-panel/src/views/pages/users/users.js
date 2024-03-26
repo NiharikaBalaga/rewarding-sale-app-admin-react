@@ -14,7 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 // react plugin that prints a given react component
 import ReactToPrint from "react-to-print";
@@ -41,6 +41,23 @@ import SimpleHeader from "components/Headers/SimpleHeader.js";
 
 import { dataTable } from "variables/general";
 
+
+
+ const loadData = () => {
+  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQyMDA3OCwiZXhwIjoxNzExNTA2NDc4fQ.vxdY2lQ5TJ_nzxIv4U2o4Gu230M0jOvQk69pQMhHIGQ';
+
+  fetch('/api/admin/users', { 
+    method: 'GET',
+    headers: {
+      'content-type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }    
+  }).then(res => res.json())
+  .then(body => {
+    console.log("body: ", body);
+    console.log("body.users: ", body.users);
+  });
+}
 
 const pagination = paginationFactory({
   page: 1,
@@ -72,9 +89,15 @@ const pagination = paginationFactory({
 
 const { SearchBar } = Search;
 
-function Users() {
+function Users() {  
   const [alert, setAlert] = React.useState(null);
   const componentRef = React.useRef(null);
+  
+  useEffect(() => {
+    // Call loadData when the component mounts
+    loadData();
+  }, []); 
+
   // this function will copy to clipboard an entire table,
   // so you can paste it inside an excel or csv file
   const copyToClipboardAsTable = (el) => {
@@ -187,7 +210,7 @@ function Users() {
                             },
                             /* Actions */
                             {
-                                dataField: null,
+                                dataField: "",
                                 text: "Actions",
                                 formatter: (cell, row) => (
                                     <div>
