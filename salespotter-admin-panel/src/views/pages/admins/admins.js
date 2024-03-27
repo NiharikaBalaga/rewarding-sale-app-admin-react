@@ -14,10 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
-import { NavLink, Link } from "react-router-dom";
-// react plugin that prints a given react component
-import ReactToPrint from "react-to-print";
+import React, { useState, useEffect } from "react";
 // react component for creating dynamic tables
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
@@ -26,20 +23,16 @@ import ToolkitProvider, { Search } from "react-bootstrap-table2-toolkit/dist/rea
 import ReactBSAlert from "react-bootstrap-sweetalert";
 // reactstrap components
 import {
-  Button,
-  ButtonGroup,
   Card,
   CardHeader,
   Container,
   Row,
-  Col,
   UncontrolledTooltip,
   Badge
 } from "reactstrap";
 // core components
 import SimpleHeader from "components/Headers/SimpleHeader.js";
-
-import { dataTable } from "variables/general";
+import { useNavigate } from 'react-router-dom';
 
 const pagination = paginationFactory({
   page: 1,
@@ -73,186 +66,254 @@ const { SearchBar } = Search;
 
 function Admins() {
   const [alert, setAlert] = React.useState(null);
-  const componentRef = React.useRef(null);
-  // this function will copy to clipboard an entire table,
-  // so you can paste it inside an excel or csv file
-  const copyToClipboardAsTable = (el) => {
-    var body = document.body,
-      range,
-      sel;
-    if (document.createRange && window.getSelection) {
-      range = document.createRange();
-      sel = window.getSelection();
-      sel.removeAllRanges();
-      try {
-        range.selectNodeContents(el);
-        sel.addRange(range);
-      } catch (e) {
-        range.selectNode(el);
-        sel.addRange(range);
+  const navigate = useNavigate();
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMTUxMTY1OCwiZXhwIjoxNzExNTE1MjU4fQ.jP35-Oz4zc1BZwA4UdV_5r8IPUOjlFpguH7tV50YFAs';
+  const [admins, setAdmins] = useState([]); // Initial empty array of users  
+
+  const loadData = () => {
+    fetch('/api/admin', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
       }
-      document.execCommand("copy");
-    } else if (body.createTextRange) {
-      range = body.createTextRange();
-      range.moveToElementText(el);
-      range.select();
-      range.execCommand("Copy");
-    }
-    setAlert(
-      <ReactBSAlert
-        success
-        style={{ display: "block", marginTop: "-100px" }}
-        title="Good job!"
-        onConfirm={() => setAlert(null)}
-        onCancel={() => setAlert(null)}
-        confirmBtnBsStyle="info"
-        btnSize=""
-      >
-        Copied to clipboard!
-      </ReactBSAlert>
-    );
+    }).then(res => res.json())
+      .then(body => {
+        console.log("body: ", body);
+        console.log("body.admins: ", body.admins);
+        setAdmins(body.admins);
+      });
+  }
+
+  useEffect(() => {
+    // Call loadData when the component mounts
+    loadData();
+  }, []);
+  
+  const handleEditClick = (admin) => {
+    console.log("handleEditClick admin: ", admin)
+    navigate("/admin/admin-edit", { state: { admin: admin } });
   };
+
+  const blockAdmin = (adminId) => {
+    console.log("adminId: ", adminId);
+    fetch('/api/admin/block', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({ adminId: adminId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Admin blocked:', data);
+      // Optionally refresh the admins list here
+      loadData();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
+
+  const deleteAdmin = (adminId) => {
+    console.log("adminId: ", adminId);
+    fetch('/api/admin', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({ adminId: adminId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Admin deleted:', data);
+      // Optionally refresh the admins list here
+      loadData();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
 
   return (
     <>
-    {alert}
-    <SimpleHeader name="Admins" parentName="Admins" />
-    <Container className="mt--6" fluid>
+      {alert}
+      <SimpleHeader name="Admins" parentName="Admins" />
+      <Container className="mt--6" fluid>
         <Row>
-            <div className="col">
-                <Card>
-                    <CardHeader>
-                        <h3 className="mb-0">Admins</h3>
-                    </CardHeader>
-                    <ToolkitProvider
-                        data={dataTable}
-                        keyField="name"
-                        columns={[
-                            /* Name */
-                            {
-                                dataField: "name",
-                                text: "Name",
-                                sort: true,
-                                formatter: (cell, row, rowIndex) => (
-                                    <div>
-                                        {rowIndex % 2 === 0 ? (
-                                            <img
-                                            alt="..."
-                                            className="avatar rounded-circle mr-3"
-                                            src={require("assets/img/theme/team-4.jpg")}
-                                            />
-                                        ) : (
-                                            <img
-                                            alt="..."
-                                            className="avatar rounded-circle mr-3"
-                                            src={require("assets/img/theme/team-5.jpg")}
-                                            />
-                                        )}
-                                        <b>{cell}</b>
-                                    </div>
-                                )
-                            },
-                            /* Phone number */
-                            {
-                                dataField: "office",
-                                text: "Phone number",
-                                sort: true,
-                            },
-                            /* Email address */
-                            {                    
-                                dataField: "position",
-                                text: "Email address",
-                                sort: true,                                
-                            },
-                            /* Status */
-                            {                    
-                                text: "Status",
-                                sort: true,
-                                formatter: (cell, row) => (
-                                    <div>
-                                        {cell}
-                                        <Badge color="" className="badge-dot mr-4">
-                                        <i className="bg-success" />
-                                        <span className="status">Active</span>
-                                        </Badge>
-                                    </div>
-                                    )
-                            },
-                            /* Actions */
-                            {
-                                dataField: null,
-                                text: "Actions",
-                                formatter: (cell, row) => (
-                                    <div>
-                                    {/* Edit admin icon */}
-                                    <NavLink
-                                        to="/admin/admin-edit"
-                                        className="table-action"
-                                        id="tooltip564981685"                                        
-                                    >
-                                        <i className="fas fa-edit" />
-                                    </NavLink>                                    
-                                    <UncontrolledTooltip delay={0} target="tooltip564981685">
-                                        Edit admin
-                                    </UncontrolledTooltip>
-                                    {/* Block admin icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065235"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-ban" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065235">
-                                        Block admin
-                                    </UncontrolledTooltip>
-                                    {/* Delete admin icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065234"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-trash" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Delete admin
-                                    </UncontrolledTooltip>
-                                    </div>
-                                )
-                            }
-                        ]}
-                        search
-                    >
-                    {(props) => (
-                        <div className="py-4 table-responsive">
-                        <div
-                            id="datatable-basic_filter"
-                            className="dataTables_filter px-4 pb-1"
+          <div className="col">
+            <Card>
+              <CardHeader>
+                <h3 className="mb-0">Admins</h3>
+              </CardHeader>
+              <ToolkitProvider
+                data={admins}
+                keyField="_id"
+                columns={[
+                  /* Name */
+                  {
+                    dataField: "name",
+                    text: "Name",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => (
+                      <div>
+                        {rowIndex % 2 === 0 ? (
+                          <img
+                            alt="..."
+                            className="avatar rounded-circle mr-3"
+                            src={require("assets/img/theme/team-1.jpg")}
+                          />
+                        ) : (
+                          <img
+                            alt="..."
+                            className="avatar rounded-circle mr-3"
+                            src={require("assets/img/theme/team-2.jpg")}
+                          />
+                        )}
+                        <b>{`${row.firstName} ${row.lastName}`}</b>
+                      </div>
+                    )
+                  },
+                  /* Email address */
+                  {
+                    dataField: "email",
+                    text: "Email address",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Phone number */
+                  {
+                    dataField: "phoneNumber",
+                    text: "Phone number",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Created at */
+                  {
+                    dataField: "createdAt",
+                    text: "Created at",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => {
+                      const dateObj = new Date(cell);
+                      // Converts to YYYY-MM-DD format
+                      const formattedDate = dateObj.toISOString().split('T')[0];
+                      return <span>{formattedDate}</span>;
+                    }
+                  },
+                  /* Status */
+                  {
+                    dataField: "status",
+                    text: "Status",                              
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => {
+                      // Determine the badge class based on the signedUp field's value
+                      const badgeClass = !row.isBlocked ? "bg-success" : "bg-danger";
+                  
+                      // Determine the text to display based on the signedUp field's value
+                      const statusText = !row.isBlocked ? "Active" : "Blocked";
+                  
+                      return (
+                        <div>
+                          <Badge color="" className={`badge-dot mr-4`}>
+                            <i className={badgeClass} /> 
+                            <span className="status">{statusText}</span>
+                          </Badge>
+                        </div>
+                      );
+                    }
+                  },
+                  /* Actions */
+                  {
+                    dataField: "actions",
+                    text: "Actions",
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => (
+                      <div>
+                        {/* Edit admin icon */}
+                        <a
+                          className="table-action"
+                          href="#edit"
+                          id="tooltip564981685"
+                          onClick={(e) => {
+                            e.preventDefault();                            
+                            handleEditClick(row);
+                          }}
                         >
-                            <label>
-                            Search:
-                            <SearchBar
-                                className="form-control-sm"
-                                placeholder=""
-                                {...props.searchProps}
-                            />
-                            </label>
-                        </div>
-                        <BootstrapTable
-                            {...props.baseProps}
-                            bootstrap4={true}
-                            pagination={pagination}
-                            bordered={false}
+                          <i className="fas fa-edit" />
+                        </a>
+                        <UncontrolledTooltip delay={0} target="tooltip564981685">
+                          Edit admin
+                        </UncontrolledTooltip>
+                        {/* Block admin icon */}
+                        <a
+                          className="table-action table-action-delete"
+                          href="#pablo"
+                          id="tooltip601065235"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            blockAdmin(row._id);
+                          }}
+                        >
+                          <i className="fas fa-ban" />
+                        </a>
+                        <UncontrolledTooltip delay={0} target="tooltip601065235">
+                          Block admin
+                        </UncontrolledTooltip>
+                        {/* Delete admin icon */}
+                        <a
+                          className="table-action table-action-delete"
+                          href="#pablo"
+                          id="tooltip601065234"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            deleteAdmin(row._id);
+                          }}
+                        >
+                          <i className="fas fa-trash" />
+                        </a>
+                        <UncontrolledTooltip delay={0} target="tooltip601065234">
+                          Delete admin
+                        </UncontrolledTooltip>
+                      </div>
+                    )
+                  }
+                ]}
+                search
+              >
+                {(props) => (
+                  <div className="py-4 table-responsive">
+                    <div
+                      id="datatable-basic_filter"
+                      className="dataTables_filter px-4 pb-1"
+                    >
+                      <label>
+                        Search:
+                        <SearchBar
+                          className="form-control-sm"
+                          placeholder=""
+                          {...props.searchProps}
                         />
-                        </div>
-                    )}
-                    </ToolkitProvider>
-                </Card>            
-            </div>
+                      </label>
+                    </div>
+                    <BootstrapTable
+                      {...props.baseProps}
+                      bootstrap4={true}
+                      pagination={pagination}
+                      bordered={false}
+                    />
+                  </div>
+                )}
+              </ToolkitProvider>
+            </Card>
+          </div>
         </Row>
-    </Container>
+      </Container>
     </>
   );
 }

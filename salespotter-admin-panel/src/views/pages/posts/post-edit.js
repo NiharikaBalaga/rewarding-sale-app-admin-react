@@ -16,9 +16,8 @@
 */
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import NumberFormat from 'react-number-format';
-// nodejs library that concatenates classes
-import classnames from "classnames";
+import { NumericFormat } from 'react-number-format';
+import { useNavigate } from 'react-router-dom';
 // reactstrap components
 import {
   Button,
@@ -30,70 +29,81 @@ import {
   Container,
   Row,
   Col,
-  InputGroupAddon,
-  InputGroup
 } from "reactstrap";
 // core components
 import SimpleHeader from "components/Headers/SimpleHeader.js";
 
 function PostEdit() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQ5NzA1MiwiZXhwIjoxNzExNTgzNDUyfQ.JNATBG29CoJG2lAfr_puS7M8F3lsfiaoVULPm8woagI';  
 
   useEffect(() => {
-    console.log("Post Edit UseEffect");
-    console.log("location: ", location);
+    // If statement that checks if the location has the props with the post values
     if (location.state && location.state.post) {
-      // Now you have access to the post object passed from Posts.js
-      // You can set your form fields using this data
       const { productName, oldPrice, oldQuantity, newPrice, newQuantity } = location.state.post;
       setproductName(productName);
       setoldPrice(oldPrice);
       setoldQuantity(oldQuantity);
       setnewPrice(newPrice);
-      setnewQuantity(newQuantity);
-      // Adjust the above code based on your state setup and variable names
-    }
+      setnewQuantity(newQuantity);      
+    } 
   }, [location]);
 
   // Form State Variables
-  const [productName, setproductName] = React.useState("Soccer ball");
-  const [productNameState, setproductNameState] = React.useState(null);
+  const [productName, setproductName] = React.useState("");
   const [oldPrice, setoldPrice] = React.useState("");
-  const [oldPriceState, setoldPriceState] = React.useState(null);
   const [newPrice, setnewPrice] = React.useState("");
-  const [newPriceState, setnewPriceState] = React.useState(null);
   const [oldQuantity, setoldQuantity] = React.useState("");
-  const [oldQuantityState, setoldQuantityState] = React.useState(null);
   const [newQuantity, setnewQuantity] = React.useState("");
-  const [newQuantityState, setnewQuantityState] = React.useState(null);
 
-  const validateCustomStylesForm = () => {
-    if (productName === "") {
-      setproductNameState("invalid");
+  /**
+   * Function that validates the form before update in DB.
+   */
+  const validateForm = () => {  
+    const post = location.state.post;  
+    // Object to hold the changes
+    let changes = { postId: post._id };
+    
+    // Check which fields have changed compared to the temporary data
+    if (oldPrice !== post.oldPrice) changes.oldPrice = oldPrice;
+    if (newPrice !== post.newPrice) changes.newPrice = newPrice;
+    if (oldQuantity !== post.oldQuantity) changes.oldQuantity = oldQuantity;
+    if (newQuantity !== post.newQuantity) changes.newQuantity = newQuantity;    
+  
+    console.log("changes", changes);    
+    // Validates if there are any changes. Checks if there's more than just the postId
+    if (Object.keys(changes).length > 1) { 
+      updatePost(changes);
     } else {
-      setproductNameState("valid");
-    }
-    if (oldPrice === "") {
-      setoldPriceState("invalid");
-    } else {
-      setoldPriceState("valid");
-    }
-    if (newPrice === "") {
-      setnewPriceState("invalid");
-    } else {
-      setnewPriceState("valid");
-    }
-    if (oldQuantity === "") {
-      setoldQuantityState("invalid");
-    } else {
-      setoldQuantityState("valid");
-    }
-    if (newQuantity === "") {
-      setnewQuantityState("invalid");
-    } else {
-      setnewQuantityState("valid");
+      console.log("No changes detected.");
     }
   };
+  /**
+   * Function to redirect to post page if the admin click on the Cancel button
+   */
+  const handleCancelClick = () => {
+    navigate('/admin/posts');
+  };
+  
+  const updatePost = (changes) => {    
+    fetch('/api/admin/post', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify(changes)
+    })
+      .then(response => response.json())
+      .then(data => {        
+        navigate('/admin/posts');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
+
   return (
     <>
       <SimpleHeader name="Post edit" parentName="Post edit" />
@@ -110,20 +120,15 @@ function PostEdit() {
                     <div className="form-row">
                       <Col md="8" className="mx-auto">
                         <div className="mb-3">
-                          <label className="form-control-label" htmlFor="validationCustom01">Product name</label>
+                          <label className="form-control-label" htmlFor="productName">Product name</label>
                           <Input
-                            id="validationProductName"
+                            id="productName"
+                            name = "productName"                        
                             placeholder="Product name..."
+                            value = {productName}
                             type="text"
-                            valid={productNameState === "valid"}
-                            invalid={productNameState === "invalid"}
                             onChange={(e) => {
                               setproductName(e.target.value);
-                              if (e.target.value === "") {
-                                setproductNameState("invalid");
-                              } else {
-                                setproductNameState("valid");
-                              }
                             }}
                           />
                           <div className="invalid-feedback">Please choose a product name.</div>
@@ -131,49 +136,44 @@ function PostEdit() {
                         <Row>
                           <Col md="6" className="mx-auto">
                             <div className="mb-3">
-                              <label className="form-control-label" htmlFor="validationOldPrice">Old price</label>
-                              <Input
-                                aria-describedby="inputGroupPrepend"
-                                id="validationOldPrice"
-                                placeholder="Old price.."
-                                type="number"
-                                valid={oldPriceState === "valid"}
-                                invalid={oldPriceState === "invalid"}
-                                onChange={(e) => {
-                                  setoldPrice(e.target.value);
-                                  if (e.target.value === "") {
-                                    setoldPriceState("invalid");
-                                  } else {
-                                    setoldPriceState("valid");
-                                  }
+                              <label className="form-control-label" htmlFor="oldPrice">Old price</label>
+                              <NumericFormat                                
+                                id="oldPrice"
+                                name="oldPrice"
+                                className="form-control"
+                                placeholder="Old price..."                                
+                                value={oldPrice}
+                                onValueChange={(values) => {
+                                  const { value } = values;
+                                  setoldPrice(value);
                                 }}
+                                thousandSeparator={true}
+                                decimalScale={2}
+                                fixedDecimalScale={true}
+                                allowNegative={false}
+                                prefix="$"
                               />
                               <div className="invalid-feedback">Please choose an old price.</div>
                             </div>
                           </Col>
                           <Col md="6" className="mx-auto">
                             <div className="mb-3">
-                              <label className="form-control-label" htmlFor="validationNewPrice">New price</label>
-                              <Input
-                                aria-describedby="inputGroupPrepend"
-                                id="validationNewPrice"
-                                placeholder="New price.."
-                                type="text"
-                                prefix="$"
+                              <label className="form-control-label" htmlFor="newPrice">New price</label>
+                              <NumericFormat
+                                id="newPrice"
+                                name="newPrice"
+                                className="form-control"
+                                placeholder="New price..."
+                                value={newPrice}
+                                onValueChange={(values) => {
+                                  const { value } = values;
+                                  setnewPrice(value);
+                                }}
                                 thousandSeparator={true}
                                 decimalScale={2}
+                                fixedDecimalScale={true}
                                 allowNegative={false}
-                                allowLeadingZeros={false}
-                                valid={newPriceState === "valid"}
-                                invalid={newPriceState === "invalid"}
-                                onChange={(e) => {
-                                  setnewPrice(e.target.value);
-                                  if (e.target.value === "") {
-                                    setnewPriceState("invalid");
-                                  } else {
-                                    setnewPriceState("valid");
-                                  }
-                                }}
+                                prefix="$"
                               />
                               <div className="invalid-feedback">Please choose a new price.</div>
                             </div>
@@ -182,21 +182,15 @@ function PostEdit() {
                         <Row>
                           <Col md="6" className="mx-auto">
                             <div className="mb-3">
-                              <label className="form-control-label" htmlFor="validationOldQuantity">Old quantity</label>
-                              <Input
-                                aria-describedby="inputGroupPrepend"
-                                id="validationOldQuantity"
-                                placeholder="Old quantity.."
+                              <label className="form-control-label" htmlFor="oldQuantity">Old quantity</label>
+                              <Input                                
+                                id="oldQuantity"
+                                name="oldQuantity"
+                                placeholder="Old quantity..."
                                 type="number"
-                                valid={oldQuantityState === "valid"}
-                                invalid={oldQuantityState === "invalid"}
+                                value={oldQuantity}
                                 onChange={(e) => {
                                   setoldQuantity(e.target.value);
-                                  if (e.target.value === "") {
-                                    setoldQuantityState("invalid");
-                                  } else {
-                                    setoldQuantityState("valid");
-                                  }
                                 }}
                               />
                               <div className="invalid-feedback">Please choose an old quantity.</div>
@@ -204,21 +198,15 @@ function PostEdit() {
                           </Col>
                           <Col md="6" className="mx-auto">
                             <div className="mb-3">
-                              <label className="form-control-label" htmlFor="validationNewQuantity">New quantity</label>
-                              <Input
-                                aria-describedby="inputGroupPrepend"
-                                id="validationNewQuantity"
+                              <label className="form-control-label" htmlFor="newQuantity">New quantity</label>
+                              <Input                                
+                                id="newQuantity"
+                                name="newQuantity"
                                 placeholder="New quantity.."
                                 type="number"
-                                valid={newQuantityState === "valid"}
-                                invalid={newQuantityState === "invalid"}
+                                value={newQuantity}
                                 onChange={(e) => {
                                   setnewQuantity(e.target.value);
-                                  if (e.target.value === "") {
-                                    setnewQuantityState("invalid");
-                                  } else {
-                                    setnewQuantityState("valid");
-                                  }
                                 }}
                               />
                               <div className="invalid-feedback">Please choose a new quantity.</div>
@@ -229,9 +217,17 @@ function PostEdit() {
                           color="primary"
                           style={{ backgroundColor: "#1B2A72" }}
                           type="button"
-                          onClick={validateCustomStylesForm}
+                          onClick={validateForm}
                         >
                           Submit
+                        </Button>
+                        <Button
+                          color="primary"
+                          style={{ backgroundColor: "#1B2A72" }}
+                          type="button"
+                          onClick={handleCancelClick}
+                        >
+                          Cancel
                         </Button>
                       </Col>
                     </div>

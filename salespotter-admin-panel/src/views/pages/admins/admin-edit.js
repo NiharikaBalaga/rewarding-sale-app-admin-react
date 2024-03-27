@@ -14,188 +14,194 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
-// nodejs library that concatenates classes
-import classnames from "classnames";
+import React, { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 // reactstrap components
 import {
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  Form,
-  Input,
-  Container,
-  Row,
-  Col,
-  InputGroup,
-  InputGroupAddon
+    Button,
+    Card,
+    CardHeader,
+    CardBody,
+    Form,
+    Input,
+    Container,
+    Row,
+    Col,
+    InputGroup,
+    InputGroupAddon
 } from "reactstrap";
 // core components
 import SimpleHeader from "components/Headers/SimpleHeader.js";
 
-function AdminEdit() {  
-  const [userName, setuserName] = React.useState("Mark");
-  const [userNameState, setuserNameState] = React.useState(null);
-  const [password, setpassword] = React.useState("(226)-775-7415");
-  const [passwordVisible, setPasswordVisible] = React.useState(false);
-  const [passwordState, setpasswordState] = React.useState(null);
-  const [phoneNumber, setphoneNumber] = React.useState("(226)-775-7415");
-  const [phoneNumberState, setphoneNumberState] = React.useState(null);
-  const [emailAddress, setemailAddress] = React.useState("");
-  const [emailAddressState, setemailAddressState] = React.useState(null);
+function AdminEdit() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMTUxMTY1OCwiZXhwIjoxNzExNTE1MjU4fQ.jP35-Oz4zc1BZwA4UdV_5r8IPUOjlFpguH7tV50YFAs';
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
-  };
+    useEffect(() => {
+        console.log("location: ", location);
+        // If statement that checks if the location has the props with the post values
+        if (location.state && location.state.admin) {
+            console.log("ifff: ", location.state.admin);
+            const { firstName, lastName, phoneNumber, email } = location.state.admin;
+            setfirstName(firstName);
+            setlastName(lastName);
+            setphoneNumber(phoneNumber);
+            setemail(email);
+        }
+    }, [location]);
 
-  const validateCustomStylesForm = () => {
-    if (userName === "") {
-      setuserNameState("invalid");
-    } else {
-      setuserNameState("valid");
-    }
-    if (password === "") {
-        setpasswordState("invalid");
-      } else {
-        setpasswordState("valid");
+    const [firstName, setfirstName] = React.useState(null);
+    const [lastName, setlastName] = React.useState(null);
+    const [phoneNumber, setphoneNumber] = React.useState(null);
+    const [email, setemail] = React.useState(null);
+
+    /**
+   * Function that validates the form before update in DB.
+   */
+    const validateForm = () => {
+        const admin = location.state.admin;
+        // Object to hold the changes
+        let changes = { adminId: admin._id };
+
+        // Check which fields have changed compared to the temporary data
+        if (firstName !== admin.firstName) changes.firstName = firstName;
+        if (lastName !== admin.lastName) changes.lastName = lastName;
+        if (phoneNumber !== admin.phoneNumber) changes.phoneNumber = phoneNumber;
+        if (email !== admin.email) changes.email = email;
+
+        console.log("changes", changes);
+        // Validates if there are any changes. Checks if there's more than just the adminId
+        if (Object.keys(changes).length > 1) {
+            updateAdmin(changes);
+        } else {
+            console.log("No changes detected.");
+        }
+    };
+    /**
+     * Function to redirect to post page if the admin click on the Cancel button
+     */
+    const handleCancelClick = () => {
+        navigate('/admin/admins');
+    };
+
+    const updateAdmin = (changes) => {    
+        fetch('/api/admin', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify(changes)
+        })
+          .then(response => response.json())
+          .then(data => {        
+            navigate('/admin/admins');
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
       }
-    if (phoneNumber === "") {
-      setphoneNumberState("invalid");
-    } else {
-      setphoneNumberState("valid");
-    }
-    if (emailAddress === "") {
-      setemailAddressState("invalid");
-    } else {
-      setemailAddressState("valid");
-    }
-  };
-  return (
-    <>
-      <SimpleHeader name="Admin edit" parentName="Admin edit" />
-      <Container className="mt--6" fluid>
-        <Row>
-            <div className="col">
-                <div className="card-wrapper">
-                    <Card>
-                        <CardHeader>
-                            <h3 className="mb-0">Admin edit</h3>
-                        </CardHeader>
-                        <CardBody className="p-5">                        
-                            <Form className="needs-validation" noValidate>
-                                <div className="form-row">
-                                    <Col md="8" className="mx-auto">
-                                        <div className="mb-3">
-                                            <label className="form-control-label" htmlFor="validationCustom01">User name</label>
-                                            <Input
-                                                defaultValue="Mark"
-                                                id="validationUserName"
-                                                placeholder="User name..."
-                                                type="text"
-                                                valid={userNameState === "valid"}
-                                                invalid={userNameState === "invalid"}
-                                                onChange={(e) => {
-                                                setuserName(e.target.value);
-                                                if (e.target.value === "") {
-                                                    setuserNameState("invalid");
-                                                } else {
-                                                    setuserNameState("valid");
-                                                }
-                                                }}
-                                            />                                            
-                                            <div className="invalid-feedback">Please choose a user name.</div>
+
+    return (
+        <>
+            <SimpleHeader name="Admin edit" parentName="Admin edit" />
+            <Container className="mt--6" fluid>
+                <Row>
+                    <div className="col">
+                        <div className="card-wrapper">
+                            <Card>
+                                <CardHeader>
+                                    <h3 className="mb-0">Admin edit</h3>
+                                </CardHeader>
+                                <CardBody className="p-5">
+                                    <Form className="needs-validation" noValidate>
+                                        <div className="form-row">
+                                            <Col md="8" className="mx-auto">
+                                                <div className="mb-3">
+                                                    <label className="form-control-label" htmlFor="validationCustom01">First Name</label>
+                                                    <Input
+                                                        id="firstName"
+                                                        name="firstName"
+                                                        placeholder="First Name..."
+                                                        value = {firstName}
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            setfirstName(e.target.value);
+                                                        }}
+                                                    />
+                                                    <div className="invalid-feedback">Please choose a first name.</div>
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="form-control-label" htmlFor="validationCustom01">Last Name</label>
+                                                    <Input
+                                                        id="lastName"
+                                                        name="lastName"
+                                                        placeholder="Last Name..."
+                                                        value = {lastName}
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            setlastName(e.target.value);
+                                                        }}
+                                                    />
+                                                    <div className="invalid-feedback">Please choose a last name.</div>
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="form-control-label" htmlFor="validationCustom02">Phone number</label>
+                                                    <Input
+                                                        id="phoneNumber"
+                                                        name="phoneNumber"
+                                                        placeholder="Phone number..."
+                                                        value = {phoneNumber}
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            setphoneNumber(e.target.value);
+                                                        }}
+                                                    />
+                                                    <div className="invalid-feedback">Please choose a phone number.</div>
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="form-control-label" htmlFor="validationCustomUsername">Email address</label>
+                                                    <Input
+                                                        id="email"
+                                                        name="email"
+                                                        placeholder="Email address..."
+                                                        value = {email}
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            setemail(e.target.value);
+                                                        }}
+                                                    />
+                                                    <div className="invalid-feedback">Please choose an email address.</div>
+                                                </div>
+                                                <Button
+                                                    color="primary"
+                                                    style={{ backgroundColor: "#1B2A72" }}
+                                                    type="button"
+                                                    onClick={validateForm}
+                                                >
+                                                    Submit
+                                                </Button>
+                                                <Button
+                                                    color="primary"
+                                                    style={{ backgroundColor: "#1B2A72" }}
+                                                    type="button"
+                                                    onClick={handleCancelClick}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </Col>
                                         </div>
-                                        <div className="mb-3">
-                                            <label className="form-control-label" htmlFor="validationCustom01">Password</label>
-                                            <InputGroup>
-                                                <Input
-                                                    defaultValue="Mark"
-                                                    id="validationPassword"
-                                                    placeholder="Password..."
-                                                    type={passwordVisible ? 'text' : 'password'}
-                                                    valid={passwordState === "valid"}
-                                                    invalid={passwordState === "invalid"}
-                                                    onChange={(e) => {
-                                                    setpassword(e.target.value);
-                                                    if (e.target.value === "") {
-                                                        setpasswordState("invalid");
-                                                    } else {
-                                                        setpasswordState("valid");
-                                                    }
-                                                    }}
-                                                />    
-                                                <InputGroupAddon addonType="append">
-                                                    <Button color="mute" style={{ border: "none", boxShadow: "none", background: "transparent", position: "absolute", right: "0", top: "3px" }} onClick={togglePasswordVisibility}>
-                                                        {passwordVisible ? (
-                                                        <i className="fas fa-eye-slash"></i>
-                                                        ) : (
-                                                        <i className="fas fa-eye"></i>
-                                                        )}
-                                                    </Button>
-                                                </InputGroupAddon>
-                                            </InputGroup>                                       
-                                            <div className="invalid-feedback">Please choose a user name.</div>
-                                        </div>
-                                        <div className="mb-3">
-                                            <label className="form-control-label" htmlFor="validationCustom02">Phone number</label>
-                                            <Input
-                                                defaultValue="(226)-775-7415"
-                                                id="validationPhoneNumber"
-                                                placeholder="Phone number..."
-                                                type="text"
-                                                valid={phoneNumberState === "valid"}
-                                                invalid={phoneNumberState === "invalid"}
-                                                onChange={(e) => {
-                                                setphoneNumber(e.target.value);
-                                                if (e.target.value === "") {
-                                                    setphoneNumberState("invalid");
-                                                } else {
-                                                    setphoneNumberState("valid");
-                                                }
-                                                }}
-                                            />                                            
-                                            <div className="invalid-feedback">Please choose a phone number.</div>
-                                        </div>
-                                        <div className="mb-3">
-                                            <label className="form-control-label" htmlFor="validationCustomUsername">Email address</label>
-                                            <Input
-                                                aria-describedby="inputGroupPrepend"
-                                                id="validationEmailAddress"
-                                                placeholder="Email address.."
-                                                type="text"
-                                                valid={emailAddressState === "valid"}
-                                                invalid={emailAddressState === "invalid"}
-                                                onChange={(e) => {
-                                                setemailAddress(e.target.value);
-                                                if (e.target.value === "") {
-                                                    setemailAddressState("invalid");
-                                                } else {
-                                                    setemailAddressState("valid");
-                                                }
-                                                }}
-                                            />
-                                            <div className="invalid-feedback">Please choose an email address.</div>
-                                        </div>
-                                        <Button
-                                            color="primary"
-                                            style={{ backgroundColor: "#1B2A72" }}
-                                            type="button"
-                                            onClick={validateCustomStylesForm}
-                                        >
-                                            Submit
-                                        </Button>
-                                    </Col>
-                                </div>
-                            </Form>
-                        </CardBody>
-                    </Card>                            
-                </div>
-            </div>
-        </Row>
-      </Container>
-    </>
-  );
+                                    </Form>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    </div>
+                </Row>
+            </Container>
+        </>
+    );
 }
 
 export default AdminEdit;

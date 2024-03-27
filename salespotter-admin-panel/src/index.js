@@ -39,18 +39,23 @@ import AuthLayout from "layouts/Auth.js";
 import IndexView from "views/Index.js";
 import Dashboard from "views/pages/dashboards/Dashboard";
 import Users from "views/pages/users/users";
+import Posts from "views/pages/posts/posts";
+import PostEdit from "views/pages/posts/post-edit";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route path="/admin/*" element={<AdminLayout />}>        
-        <Route index element={<Navigate to="/admin/dashboard" />} />        
+      <Route path="/admin/*" element={<AdminLayout />}>
+        <Route index element={<Navigate to="/admin/dashboard" />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="posts" element={<Posts />} />
+        <Route path="post-edit" element={<PostEdit />} />
       </Route>
       <Route path="/rtl/*" element={<RTLLayout />} />
       <Route path="/auth/*" element={<AuthLayout />} />
-      <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />      
+      <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   </BrowserRouter>

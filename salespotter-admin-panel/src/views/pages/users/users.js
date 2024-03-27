@@ -86,7 +86,7 @@ function Users() {
     .then(body => {
       console.log("body: ", body);
       console.log("body.users: ", body.users);
-      setUsers(body.users); // Update the state with fetched users
+      setUsers(body.users); 
     });
   }
 
@@ -192,10 +192,10 @@ function Users() {
                               classes: "vertical-align-middle",
                               formatter: (cell, row) => {
                                 // Determine the badge class based on the signedUp field's value
-                                const badgeClass = row.signedUp ? "bg-success" : "bg-danger";
+                                const badgeClass = !row.isBlocked ? "bg-success" : "bg-danger";
                             
                                 // Determine the text to display based on the signedUp field's value
-                                const statusText = row.signedUp ? "Active" : "Inactive";
+                                const statusText = !row.isBlocked ? "Active" : "Blocked";
                             
                                 return (
                                   <div>

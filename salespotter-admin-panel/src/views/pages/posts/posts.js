@@ -15,9 +15,6 @@
 
 */
 import React, { useState, useEffect } from "react";
-import { NavLink, Link } from "react-router-dom";
-// react plugin that prints a given react component
-import ReactToPrint from "react-to-print";
 // react component for creating dynamic tables
 import BootstrapTable from "react-bootstrap-table-next";
 import paginationFactory from "react-bootstrap-table2-paginator";
@@ -26,20 +23,16 @@ import ToolkitProvider, { Search } from "react-bootstrap-table2-toolkit/dist/rea
 import ReactBSAlert from "react-bootstrap-sweetalert";
 // reactstrap components
 import {
-  Button,
-  ButtonGroup,
   Card,
   CardHeader,
   Container,
   Row,
-  Col,
   UncontrolledTooltip,
   Badge
 } from "reactstrap";
 // core components
 import SimpleHeader from "components/Headers/SimpleHeader.js";
-
-import { dataTable } from "variables/general";
+import { useNavigate } from 'react-router-dom';
 
 const pagination = paginationFactory({
   page: 1,
@@ -72,11 +65,16 @@ const pagination = paginationFactory({
 const { SearchBar } = Search;
 
 function Posts() {
-  const [alert, setAlert] = React.useState(null);
-  const componentRef = React.useRef(null);
-
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQ5NzA1MiwiZXhwIjoxNzExNTgzNDUyfQ.JNATBG29CoJG2lAfr_puS7M8F3lsfiaoVULPm8woagI';
+  const [alert, setAlert] = React.useState(null);  
+  const navigate = useNavigate();
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTUxMjY4MCwiZXhwIjoxNzExNTk5MDgwfQ.Upr94H7nZr7kLIqxWbddlS9FccgulGwhntNHBZYODow';
   const [posts, setPosts] = useState([]);
+  
+  const handleEditClick = (post) => {
+    console.log("handleEditClick post: ", post)
+    navigate("/admin/post-edit", { state: { post } });
+  };
+
 
   const loadData = () => {
     fetch('/api/admin/post', {
@@ -89,7 +87,7 @@ function Posts() {
       .then(body => {
         console.log("body posts: ", body);
         console.log("body.posts: ", body.posts);
-        setPosts(body.posts); // Update the state with fetched users
+        setPosts(body.posts); 
       });
   }
 
@@ -111,7 +109,7 @@ function Posts() {
       .then(response => response.json())
       .then(data => {
         console.log('Post blocked:', data);
-        // Optionally refresh the users list here
+        // Optionally refresh the posts list here
         loadData();
       })
       .catch((error) => {
@@ -242,16 +240,17 @@ function Posts() {
                     formatter: (cell, row) => (
                       <div>
                         {/* Edit post icon */}
-                        <Link
-                          to={{
-                            pathname: "/admin/post-edit",
-                            state: { post: row } // passing the entire post object as state
-                          }}
+                        <a
                           className="table-action"
+                          href="#edit"
                           id="tooltip564981685"
+                          onClick={(e) => {
+                            e.preventDefault();                            
+                            handleEditClick(row);
+                          }}
                         >
                           <i className="fas fa-edit" />
-                        </Link>
+                        </a>
                         <UncontrolledTooltip delay={0} target="tooltip564981685">
                           Edit post
                         </UncontrolledTooltip>
