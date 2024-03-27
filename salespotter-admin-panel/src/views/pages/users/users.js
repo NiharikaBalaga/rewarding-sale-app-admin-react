@@ -73,7 +73,7 @@ function Users() {
   const [alert, setAlert] = React.useState(null);  
   
   const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQ5NzA1MiwiZXhwIjoxNzExNTgzNDUyfQ.JNATBG29CoJG2lAfr_puS7M8F3lsfiaoVULPm8woagI';
-  const [users, setUsers] = useState([]); // Initial empty array of users  
+  const [users, setUsers] = useState([]);
 
   const loadData = () => {      
     fetch('/api/admin/users', { 

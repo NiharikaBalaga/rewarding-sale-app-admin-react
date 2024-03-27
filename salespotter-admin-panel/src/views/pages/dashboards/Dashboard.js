@@ -21,6 +21,9 @@ import classnames from "classnames";
 import Chart from "chart.js";
 // react plugin used to create charts
 import { Line, Bar } from "react-chartjs-2";
+import BootstrapTable from "react-bootstrap-table-next";
+import paginationFactory from "react-bootstrap-table2-paginator";
+import ToolkitProvider, { Search } from "react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit";
 
 // reactstrap components
 import {
@@ -59,29 +62,224 @@ import {
   chartExample2,
 } from "variables/charts.js";
 
+const pagination = paginationFactory({
+  page: 1,
+  alwaysShowAllBtns: true,
+  showTotal: true,
+  withFirstAndLast: false,
+  sizePerPageRenderer: ({ options, currSizePerPage, onSizePerPageChange }) => (
+    <div className="dataTables_length" id="datatable-basic_length">
+      <label>
+        Show{" "}
+        {
+          <select
+            name="datatable-basic_length"
+            aria-controls="datatable-basic"
+            className="form-control form-control-sm"
+            onChange={(e) => onSizePerPageChange(e.target.value)}
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        }{" "}
+        entries.
+      </label>
+    </div>
+  ),
+});
+
+const { SearchBar } = Search;
 
 function Dashboard() {
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU0NzkwNSwiZXhwIjoxNzExNjM0MzA1fQ.nNMIfHZyiDoRUHpx2P17CR8-MlLp5AYSQTD9kBQNonw';  
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU0NzkwNSwiZXhwIjoxNzExNjM0MzA1fQ.nNMIfHZyiDoRUHpx2P17CR8-MlLp5AYSQTD9kBQNonw';
   const [posts, setPosts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [postsChartData, setPostsChartData] = useState({});
+  const [usersChartData, setUsersChartData] = useState({});
 
-  const loadPosts = () => {
-    fetch('/api/admin/post', {
+  /* const loadPosts = async () => {
+    const response = await fetch('/api/admin/post', {
       method: 'GET',
       headers: {
         'content-type': 'application/json',
         'Authorization': `Bearer ${TOKEN}`,
-      }
-    }).then(res => res.json())
-      .then(body => {        
-        console.log("body.posts: ", body.posts);
-        const posts = body.posts
-        setPosts(posts); 
-      });
-  }  
+      },
+    });
+    const body = await response.json();
+    console.log("body.posts: ", body.posts);
+    setPosts(body.posts);
+    aggregatePostsByMonth(body.posts); // Process posts for chart data
+  }; */
+  const loadPosts = async () => {
+    const response = await fetch('/api/admin/post', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    });
+    const body = await response.json();
+    console.log("body.posts: ", body.posts);
+    setPosts(body.posts);
+    aggregatePostsByMonth(body.posts); // Process posts for chart data
+    return body.posts; // Return the posts from the function
+  };
 
-  useEffect(() => {    
+  const aggregatePostsByMonth = (posts) => {
+    const currentYear = new Date().getFullYear();
+    const postsPerMonth = new Array(12).fill(0); // For each month
+
+    posts.forEach(post => {
+      const date = new Date(post.createdAt);
+      const month = date.getMonth(); // getMonth() returns 0-11
+      const year = date.getFullYear();
+
+      if (year === currentYear) {
+        postsPerMonth[month]++;
+      }
+    });
+
+    updatePostChartData(postsPerMonth);
+  };
+
+  /* const loadUsers = async () => {
+    const response = await fetch('/api/admin/users', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    });
+    const body = await response.json();
+    console.log("body.users: ", body.users);
+    setUsers(body.users);
+    aggregateUsersByMonth(body.users); // Process users for chart data
+  }; */
+  const loadUsers = async () => {
+    const response = await fetch('/api/admin/users', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    });
+    const body = await response.json();
+    console.log("body.users: ", body.users);
+    setUsers(body.users);
+    aggregateUsersByMonth(body.users);
+    return body.users;
+  };
+
+  const aggregateUsersByMonth = (users) => {
+    const currentYear = new Date().getFullYear();
+    const usersPerMonth = new Array(12).fill(0); // For each month
+
+    users.forEach(user => {
+      const date = new Date(user.createdAt);
+      const month = date.getMonth(); // getMonth() returns 0-11
+      const year = date.getFullYear();
+
+      if (year === currentYear) {
+        usersPerMonth[month]++;
+      }
+    });
+
+    updateUserChartData(usersPerMonth);
+  };
+
+  const updatePostChartData = (postsDataPerMonth) => {
+    setPostsChartData({
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+      datasets: [
+        {
+          label: "Posts",
+          data: postsDataPerMonth,
+          fill: false,
+        },
+      ],
+    });
+  };
+
+  const updateUserChartData = (usersDataPerMonth) => {
+    setUsersChartData({
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+      datasets: [
+        {
+          label: "Users",
+          data: usersDataPerMonth,
+          fill: false,
+          backgroundColor: 'rgb(255, 99, 132)',
+          borderColor: 'rgba(255, 99, 132, 0.2)',
+        },
+      ],
+    });
+  };
+
+  // Function that counts the posts for each user and return an object with userId as key and post count as value
+  const countPostsPerUser = (posts) => {
+    return posts.reduce((acc, post) => {
+      if (!acc[post.userId]) {
+        acc[post.userId] = 0;
+      }
+      acc[post.userId]++;
+      return acc;
+    }, {});
+  };
+
+  // Call this function inside `loadUsers` after you set the users in the state
+  /* const loadUsersWithPostCount = async () => {
+    console.log("loadUsersWithPostCount");
+    // Wait for both posts and users to load
+    await Promise.all([loadPosts(), loadUsers()]); // This will also process chart data
+
+    // Use the state directly since it should be updated now
+    const postCountPerUser = countPostsPerUser(posts);
+
+    console.log("postCountPerUser: ", postCountPerUser);
+
+    // Map over the users and add postCount property to each
+    const usersWithPostCount = users.map(user => ({
+      ...user,
+      postCount: postCountPerUser[user._id] || 0,
+    }));
+
+    console.log("usersWithPostCount: ", usersWithPostCount);
+
+    // Update the state with the new users array
+    setUsers(usersWithPostCount);
+  }; */
+  const loadUsersWithPostCount = async () => {
+    console.log("loadUsersWithPostCount");
+    // Wait for both posts and users to load
+    const [loadedPosts, loadedUsers] = await Promise.all([loadPosts(), loadUsers()]);
+  
+    // Use the loaded posts to count them per user
+    const postCountPerUser = countPostsPerUser(loadedPosts);
+  
+    console.log("postCountPerUser: ", postCountPerUser);
+  
+    // Map over the loaded users and add postCount property to each
+    const usersWithPostCount = loadedUsers.map(user => ({
+      ...user,
+      postCount: postCountPerUser[user._id] || 0,
+    }));
+  
+    console.log("usersWithPostCount: ", usersWithPostCount);
+  
+    // Update the state with the new users array
+    setUsers(usersWithPostCount);
+  };
+
+
+
+  useEffect(() => {
     // Call loadPosts when the component mounts
-    loadPosts();
+    //loadPosts();
+    // Call loadUsers when the component mounts
+    //loadUsers();
+    loadUsersWithPostCount();
   }, []);
 
 
@@ -101,7 +299,7 @@ function Dashboard() {
       <Container className="mt--6" fluid>
         <Row>
           <Col xl="6">
-            <Card className="" style={{backgroundColor:"azure"} }>
+            <Card className="" style={{ backgroundColor: "azure" }}>
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
@@ -110,41 +308,13 @@ function Dashboard() {
                     </h6>
                     <h5 className="h3 text-black mb-0">Post Details</h5>
                   </div>
-                  <div className="col">
-                    <Nav className="justify-content-end" pills>
-                      <NavItem className="mr-2 mr-md-0">
-                        <NavLink
-                          className={classnames("py-2 px-3", {
-                            active: activeNav === 1,
-                          })}
-                          href="#pablo"
-                          onClick={(e) => toggleNavs(e, 1)}
-                        >
-                          <span className="d-none d-md-block">Month</span>
-                          <span className="d-md-none">M</span>
-                        </NavLink>
-                      </NavItem>
-                      <NavItem>
-                        <NavLink
-                          className={classnames("py-2 px-3", {
-                            active: activeNav === 2,
-                          })}
-                          data-toggle="tab"
-                          href="#pablo"
-                          onClick={(e) => toggleNavs(e, 2)}
-                        >
-                          <span className="d-none d-md-block">Week</span>
-                          <span className="d-md-none">W</span>
-                        </NavLink>
-                      </NavItem>
-                    </Nav>
-                  </div>
                 </Row>
               </CardHeader>
               <CardBody>
                 <div className="chart">
                   <Line
-                    data={chartExample1[chartExample1Data]}
+                    data={postsChartData}
+                    /* data={chartExample1[postsChartData]} */
                     options={chartExample1.options}
                     id="chart-sales-dark"
                     className="chart-canvas"
@@ -153,24 +323,26 @@ function Dashboard() {
               </CardBody>
             </Card>
           </Col>
-          
+
           <Col xl="6">
             <Card>
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
                     <h6 className="text-uppercase text-muted ls-1 mb-1">
-                      Performance
+                      Overview
                     </h6>
-                    <h5 className="h3 mb-0">New User Details</h5>
+                    <h5 className="h3 mb-0">User Details</h5>
                   </div>
                 </Row>
               </CardHeader>
               <CardBody>
                 <div className="chart">
                   <Bar
-                    data={chartExample2.data}
-                    options={chartExample2.options}
+                    /* data={chartExample2.data}
+                    options={chartExample2.options} */
+                    data={usersChartData}
+                    options={chartOptions()}
                     className="chart-canvas"
                     id="chart-bars"
                   />
@@ -183,217 +355,11 @@ function Dashboard() {
           <Col xl="4">
             <Card>
               <CardHeader>
-                <h5 className="h3 mb-0">Admin Details</h5>
+                <h5 className="h3 mb-0">Post Report</h5>
               </CardHeader>
 
               <CardBody>
                 <ListGroup className="list my--3" flush>
-                  <ListGroupItem className="px-0">
-                    <Row className="align-items-center">
-                      <Col className="col-auto">
-                        <a
-                          className="avatar rounded-circle"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <img
-                            alt="..."
-                            src={require("assets/img/theme/team-1.jpg")}
-                          />
-                        </a>
-                      </Col>
-                      <div className="col ml--2">
-                        <h4 className="mb-0">
-                          <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                            John Michael
-                          </a>
-                        </h4>
-                        <span className="text-success">●</span>{" "}
-                        <small>Online</small>
-                      </div>
-                      <Col className="col-auto">
-                        <Button color="primary" size="sm" type="button">
-                          Add
-                        </Button>
-                      </Col>
-                    </Row>
-                  </ListGroupItem>
-                  <ListGroupItem className="px-0">
-                    <Row className="align-items-center">
-                      <Col className="col-auto">
-                        <a
-                          className="avatar rounded-circle"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <img
-                            alt="..."
-                            src={require("assets/img/theme/team-2.jpg")}
-                          />
-                        </a>
-                      </Col>
-                      <div className="col ml--2">
-                        <h4 className="mb-0">
-                          <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                            Alex Smith
-                          </a>
-                        </h4>
-                        <span className="text-warning">●</span>{" "}
-                        <small>In a meeting</small>
-                      </div>
-                      <Col className="col-auto">
-                        <Button color="primary" size="sm" type="button">
-                          Add
-                        </Button>
-                      </Col>
-                    </Row>
-                  </ListGroupItem>
-                  <ListGroupItem className="px-0">
-                    <Row className="align-items-center">
-                      <Col className="col-auto">
-                        <a
-                          className="avatar rounded-circle"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <img
-                            alt="..."
-                            src={require("assets/img/theme/team-3.jpg")}
-                          />
-                        </a>
-                      </Col>
-                      <div className="col ml--2">
-                        <h4 className="mb-0">
-                          <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                            Samantha Ivy
-                          </a>
-                        </h4>
-                        <span className="text-danger">●</span>{" "}
-                        <small>Offline</small>
-                      </div>
-                      <Col className="col-auto">
-                        <Button color="primary" size="sm" type="button">
-                          Add
-                        </Button>
-                      </Col>
-                    </Row>
-                  </ListGroupItem>
-                </ListGroup>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col xl="4">
-            <Card>
-              <CardHeader>
-                <h5 className="h3 mb-0">To do list</h5>
-              </CardHeader>
-
-              <CardBody className="p-0">
-                <ListGroup data-toggle="checklist" flush>
-                  <ListGroupItem className="checklist-entry flex-column align-items-start py-4 px-4">
-                    <div className="checklist-item checklist-item-success checklist-item-checked">
-                      <div className="checklist-info">
-                        <h5 className="checklist-title mb-0">Check for the post information</h5>
-                        <small>10:30 AM</small>
-                      </div>
-                      <div>
-                        <div className="custom-control custom-checkbox custom-checkbox-success">
-                          <input
-                            className="custom-control-input"
-                            defaultChecked
-                            id="chk-todo-task-1"
-                            type="checkbox"
-                          />
-                          <label
-                            className="custom-control-label"
-                            htmlFor="chk-todo-task-1"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </ListGroupItem>
-                  <ListGroupItem className="checklist-entry flex-column align-items-start py-4 px-4">
-                    <div className="checklist-item checklist-item-warning">
-                      <div className="checklist-info">
-                        <h5 className="checklist-title mb-0">Check New user details</h5>
-                        <small>10:30 AM</small>
-                      </div>
-                      <div>
-                        <div className="custom-control custom-checkbox custom-checkbox-warning">
-                          <input
-                            className="custom-control-input"
-                            id="chk-todo-task-2"
-                            type="checkbox"
-                          />
-                          <label
-                            className="custom-control-label"
-                            htmlFor="chk-todo-task-2"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </ListGroupItem>
-                  <ListGroupItem className="checklist-entry flex-column align-items-start py-4 px-4">
-                    <div className="checklist-item checklist-item-danger checklist-item-checked">
-                      <div className="checklist-info">
-                        <h5 className="checklist-title mb-0">
-                          Check New Posts
-                        </h5>
-                        <small>10:30 AM</small>
-                      </div>
-                      <div>
-                        <div className="custom-control custom-checkbox custom-checkbox-danger">
-                          <input
-                            className="custom-control-input"
-                            defaultChecked
-                            id="chk-todo-task-4"
-                            type="checkbox"
-                          />
-                          <label
-                            className="custom-control-label"
-                            htmlFor="chk-todo-task-4"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </ListGroupItem>
-                </ListGroup>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col xl="4">
-             <Card>
-              <CardHeader>
-                <h5 className="h3 mb-0">Post Report track</h5>
-              </CardHeader>
-
-              <CardBody>
-                <ListGroup className="list my--3" flush>
-                  <ListGroupItem className="px-0">
-                    <Row className="align-items-center">
-                      <Col className="col-auto">
-                        <a
-                          className="avatar rounded-circle"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <img
-                            alt="..."
-                            src={require("assets/img/brand/oos.png")}
-                          />
-                        </a>
-                      </Col>
-                      <div className="col">
-                        <h5>Out of Stock </h5>
-                        <Progress
-                          className="progress-xs mb-0"
-                          color="orange"
-                          max="100"
-                          value="60"
-                        />
-                      </div>
-                    </Row>
-                  </ListGroupItem>
                   <ListGroupItem className="px-0">
                     <Row className="align-items-center">
                       <Col className="col-auto">
@@ -409,7 +375,7 @@ function Dashboard() {
                         </a>
                       </Col>
                       <div className="col">
-                        <h5>Most Liked</h5>
+                        <h5>Upvotes</h5>
                         <Progress
                           className="progress-xs mb-0"
                           color="success"
@@ -434,7 +400,7 @@ function Dashboard() {
                         </a>
                       </Col>
                       <div className="col">
-                        <h5>Reported</h5>
+                        <h5>Reports</h5>
                         <Progress
                           className="progress-xs mb-0"
                           color="danger"
@@ -447,538 +413,35 @@ function Dashboard() {
                 </ListGroup>
               </CardBody>
             </Card>
-          </Col> 
-        </Row>
-        <Row>
-          <Col xl="12">
-            <Row>
-              <div className="col">
-                <Card>
-                  <CardHeader className="border-0">
-                    <h3 className="mb-0">User table</h3>
-                  </CardHeader>
-                  <Table className="align-items-center table-flush" responsive>
-                    <thead className="thead-light">
-                      <tr>
-                        <th >
-                          User Name
-                        </th>
-                         <th className="sort" data-sort="budget" scope="col">
-                          No of Post
-                        </th>
-                        <th className="sort" data-sort="status" scope="col">
-                          Status
-                        </th>
-                        <th scope="col">Profile Picture</th>
-                        <th className="sort" data-sort="completion" scope="col">
-                          Days Posted
-                        </th>
-                        <th scope="col" />
-                      </tr>
-                    </thead>
-                    <tbody className="list">
-                      <tr>
-                        <th scope="row">
-                          <Media className="align-items-center">
-                            <a
-                              className="avatar rounded-circle mr-3"
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/brand/salespotterlogo.png")}
-                              />
-                            </a>
-                            <Media>
-                              <span className="name mb-0 text-sm">
-                                Jhon snow
-                              </span>
-                            </Media>
-                          </Media>
-                        </th>
-                        <td className="budget">40</td>
-                        <td>
-                          <Badge className="badge-dot mr-4" color="">
-                            <i className="bg-warning" />
-                            <span className="status">pending</span>
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="avatar-group">
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip792717700"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-1.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip792717700"
-                            >
-                              Ryan Tompson
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip654289872"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-2.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip654289872"
-                            >
-                              Romina Hadid
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip409131762"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-3.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip409131762"
-                            >
-                              Alexander Smith
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip50788433"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-4.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip50788433"
-                            >
-                              Jessica Doe
-                            </UncontrolledTooltip>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <span className="completion mr-2">2</span>
-                            <div>
-                              <Progress max="3" value="2" color="warning" />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-right">
-                          <UncontrolledDropdown>
-                            <DropdownToggle
-                              color=""
-                              size="sm"
-                              className="btn-icon-only text-light"
-                            >
-                              <i className="fas fa-ellipsis-v" />
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Action
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Another action
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Something else here
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">
-                          <Media className="align-items-center">
-                            <a
-                              className="avatar rounded-circle mr-3"
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/brand/salespotterlogo.png")}
-                              />
-                            </a>
-                            <Media>
-                              <span className="name mb-0 text-sm">
-                                Porkodi Rajan
-                              </span>
-                            </Media>
-                          </Media>
-                        </th>
-                        <td className="budget">55</td>
-                        <td>
-                          <Badge className="badge-dot mr-4" color="">
-                            <i className="bg-success" />
-                            <span className="status">completed</span>
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="avatar-group">
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip545726644"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-1.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip545726644"
-                            >
-                              Ryan Tompson
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip823332447"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-2.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip823332447"
-                            >
-                              Romina Hadid
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip354076640"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-3.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip354076640"
-                            >
-                              Alexander Smith
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip625572621"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-4.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip625572621"
-                            >
-                              Jessica Doe
-                            </UncontrolledTooltip>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <span className="completion mr-2">3</span>
-                            <div>
-                              <Progress max="3" value="3" color="success" />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-right">
-                          <UncontrolledDropdown>
-                            <DropdownToggle
-                              color=""
-                              size="sm"
-                              className="btn-icon-only text-light"
-                            >
-                              <i className="fas fa-ellipsis-v" />
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Action
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Another action
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Something else here
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">
-                          <Media className="align-items-center">
-                            <a
-                              className="avatar rounded-circle mr-3"
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/brand/salespotterlogo.png")}
-                              />
-                            </a>
-                            <Media>
-                              <span className="name mb-0 text-sm">
-                                Niharika
-                              </span>
-                            </Media>
-                          </Media>
-                        </th>
-                        <td className="budget">100</td>
-                        <td>
-                          <Badge className="badge-dot mr-4" color="">
-                            <i className="bg-danger" />
-                            <span className="status">delayed</span>
-                          </Badge>
-                        </td>
-                        <td>
-                          <div className="avatar-group">
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip927457712"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-1.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip927457712"
-                            >
-                              Ryan Tompson
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip959509788"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-2.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip959509788"
-                            >
-                              Romina Hadid
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip239649821"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-3.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip239649821"
-                            >
-                              Alexander Smith
-                            </UncontrolledTooltip>
-                            <a
-                              className="avatar avatar-sm rounded-circle"
-                              href="#pablo"
-                              id="tooltip908443321"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <img
-                                alt="..."
-                                src={require("assets/img/theme/team-4.jpg")}
-                              />
-                            </a>
-                            <UncontrolledTooltip
-                              delay={0}
-                              target="tooltip908443321"
-                            >
-                              Jessica Doe
-                            </UncontrolledTooltip>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <span className="completion mr-2">1</span>
-                            <div>
-                              <Progress max="3" value="1" color="danger" />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="text-right">
-                          <UncontrolledDropdown>
-                            <DropdownToggle
-                              color=""
-                              size="sm"
-                              className="btn-icon-only text-light"
-                            >
-                              <i className="fas fa-ellipsis-v" />
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Action
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Another action
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Something else here
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </Card>
-              </div>
-            </Row>
+          </Col>
+          <Col xl="8">
             <div className="card-deck">
-              <Card className="bg-gradient-default">
-                <CardBody>
-                  <div className="mb-2">
-                    <sup i className="fas fa-star text-white"></sup>{" "}
-                    <span className="h2 text-white">3,300</span>
-                    <div className="text-light mt-2 text-sm">
-                      Current Rewards Earned
-                    </div>
-                    <div>
-                      <span className="text-success font-weight-600">
-                        + 15%
-                      </span>{" "}
-                      <span className="text-light">(250)</span>
-                    </div>
-                  </div>
-                  <Button
-                    block
-                    className="btn-neutral"
-                    color="default"
-                    size="md"
-                  >
-                    Add credit
-                  </Button>
-                </CardBody>
-                <CardBody>
-                  <Row>
-                    <div className="col">
-                      <small className="text-light">Total Claims: 60%</small>
-                      <Progress
-                        className="progress-xs my-2"
-                        max="100"
-                        value="60"
-                        color="success"
-                      />
-                    </div>
-                    <div className="col">
-                      <small className="text-light">Balance: 40%</small>
-                      <Progress
-                        className="progress-xs my-2"
-                        max="100"
-                        value="40"
-                        color="warning"
-                      />
-                    </div>
-                  </Row>
-                </CardBody>
-              </Card>
               <Card className="bg-gradient-danger">
                 <CardBody>
                   <Row className="justify-content-between align-items-center">
                     <div className="col">
-                      
+
                       <img className="avatar avatar"
                         alt="..."
                         src={require("assets/img/brand/salespotterlogo.png")}
                       />
                     </div>
-                    <Col className="col-auto">
-                      <Badge className="badge-lg" color="success">
-                        View
-                      </Badge>
-                    </Col>
                   </Row>
                   <div className="my-4">
                     <span className="h3 surtitle text-light">User having higher Reward points</span>
                     <div >
-                    <span className="h1 text-white">@johnsnow </span>
-                    <img className="avatar avatar rounded-circle"
+                      <span className="h1 text-white">Pokordi Rajan</span>
+                      <img className="avatar avatar rounded-circle"
                         alt="..."
                         src={require("assets/img/theme/team-4.jpg")} />
-                     
-                      </div>
+
+                    </div>
                   </div>
                   <Row>
                     <div className="col">
                       <span className="h4 surtitle text-light">Reward Points</span>
-                      {/* <span className="d-block h3 text-white">John Snow</span> */}
                       <span className="d-block h2 text-white">300</span>
-                      
+
                     </div>
                   </Row>
                 </CardBody>
@@ -987,196 +450,106 @@ function Dashboard() {
           </Col>
         </Row>
         <Row>
-          <Col xl="8">
+          <div className="col">
             <Card>
-              <CardHeader className="border-0">
-                <Row className="align-items-center">
-                  <div className="col">
-                    <h3 className="mb-0">Page visits</h3>
-                  </div>
-                  <div className="col text-right">
-                    <Button
-                      color="primary"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
-                      size="sm"
-                    >
-                      See all
-                    </Button>
-                  </div>
-                </Row>
+              <CardHeader>
+                <h3 className="mb-0">Users</h3>
               </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">Page name</th>
-                    <th scope="col">Visitors</th>
-                    <th scope="col">Unique users</th>
-                    <th scope="col">Bounce rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">/Home/</th>
-                    <td>4,569</td>
-                    <td>340</td>
-                    <td>
-                      <i className="fas fa-arrow-up text-success mr-3" />
-                      46,53%
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">/Home/index.html</th>
-                    <td>3,985</td>
-                    <td>319</td>
-                    <td>
-                      <i className="fas fa-arrow-down text-warning mr-3" />
-                      46,53%
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">/Home/post.html</th>
-                    <td>3,513</td>
-                    <td>294</td>
-                    <td>
-                      <i className="fas fa-arrow-down text-warning mr-3" />
-                      36,49%
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">/Home/rewards.html</th>
-                    <td>2,050</td>
-                    <td>147</td>
-                    <td>
-                      <i className="fas fa-arrow-up text-success mr-3" />
-                      50,87%
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">/Home/profile.html</th>
-                    <td>1,795</td>
-                    <td>190</td>
-                    <td>
-                      <i className="fas fa-arrow-down text-danger mr-3" />
-                      46,53%
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card>
-          </Col>
-          <Col xl="4">
-            <Card>
-              <CardHeader className="border-0">
-                <Row className="align-items-center">
-                  <div className="col">
-                    <h3 className="mb-0">Social traffic</h3>
-                  </div>
-                  <div className="col text-right">
-                    <Button
-                      color="primary"
-                      href="#pablo"
-                      onClick={(e) => e.preventDefault()}
-                      size="sm"
+              <ToolkitProvider
+                data={users}
+                keyField="_id"
+                columns={[
+                  /* Name */
+                  {
+                    dataField: "name",
+                    text: "Name",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => (
+                      <div>
+                        {rowIndex % 2 === 0 ? (
+                          <img
+                            alt="..."
+                            className="avatar rounded-circle mr-3"
+                            src={require("assets/img/theme/team-1.jpg")}
+                          />
+                        ) : (
+                          <img
+                            alt="..."
+                            className="avatar rounded-circle mr-3"
+                            src={require("assets/img/theme/team-2.jpg")}
+                          />
+                        )}
+                        <b>{`${row.firstName} ${row.lastName}`}</b>
+                      </div>
+                    )
+                  },
+                  /* Email address */
+                  {
+                    dataField: "postCount",
+                    text: "No. Posts",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Phone number */
+                  {
+                    dataField: "phoneNumber",
+                    text: "No. Rewards",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Status */
+                  {
+                    dataField: "status",
+                    text: "Status",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => {
+                      // Determine the badge class based on the signedUp field's value
+                      const badgeClass = !row.isBlocked ? "bg-success" : "bg-danger";
+
+                      // Determine the text to display based on the signedUp field's value
+                      const statusText = !row.isBlocked ? "Active" : "Blocked";
+
+                      return (
+                        <div>
+                          <Badge color="" className={`badge-dot mr-4`}>
+                            <i className={badgeClass} />
+                            <span className="status">{statusText}</span>
+                          </Badge>
+                        </div>
+                      );
+                    }
+                  }
+                ]}
+                search
+              >
+                {(props) => (
+                  <div className="py-4 table-responsive">
+                    <div
+                      id="datatable-basic_filter"
+                      className="dataTables_filter px-4 pb-1"
                     >
-                      See all
-                    </Button>
+                      <label>
+                        Search:
+                        <SearchBar
+                          className="form-control-sm"
+                          placeholder=""
+                          {...props.searchProps}
+                        />
+                      </label>
+                    </div>
+                    <BootstrapTable
+                      {...props.baseProps}
+                      bootstrap4={true}
+                      pagination={pagination}
+                      bordered={false}
+                    />
                   </div>
-                </Row>
-              </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">Referral</th>
-                    <th scope="col">Visitors</th>
-                    <th scope="col" />
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">Facebook</th>
-                    <td>1,480</td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <span className="mr-2">60%</span>
-                        <div>
-                          <Progress
-                            max="100"
-                            value="60"
-                            color="gradient-danger"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Facebook</th>
-                    <td>5,480</td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <span className="mr-2">70%</span>
-                        <div>
-                          <Progress
-                            max="100"
-                            value="70"
-                            color="gradient-success"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Google</th>
-                    <td>4,807</td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <span className="mr-2">80%</span>
-                        <div>
-                          <Progress
-                            max="100"
-                            value="80"
-                            clor="gradient-primary"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Instagram</th>
-                    <td>3,678</td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <span className="mr-2">75%</span>
-                        <div>
-                          <Progress
-                            max="100"
-                            value="75"
-                            color="gradient-info"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">twitter</th>
-                    <td>2,645</td>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <span className="mr-2">30%</span>
-                        <div>
-                          <Progress
-                            max="100"
-                            value="30"
-                            color="gradient-warning"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
+                )}
+              </ToolkitProvider>
             </Card>
-          </Col>
+          </div>
         </Row>
       </Container>
     </>
