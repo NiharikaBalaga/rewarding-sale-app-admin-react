@@ -14,7 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useState, useEffect } from "react";
 // nodejs library to set properties for components
 import PropTypes from "prop-types";
 // reactstrap components
@@ -31,10 +31,112 @@ import {
 } from "reactstrap";
 
 function CardsHeader({ name, parentName }) {
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU0NzkwNSwiZXhwIjoxNzExNjM0MzA1fQ.nNMIfHZyiDoRUHpx2P17CR8-MlLp5AYSQTD9kBQNonw';
+  const [currentMonth, setCurrentMonth] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState([]);
+  const [newUsersCurrentMonth, setNewUsersCurrentMonth] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [totalPosts, setTotalPosts] = useState([]);
+  const [newPostsCurrentMonth, setNewPostsCurrentMonth] = useState([]);
+
+  const getCurrentMonth = () => {
+    // Gets the current date
+    const currentDate = new Date();
+
+    // Get the name of the current month
+    const monthName = currentDate.toLocaleString('default', { month: 'long' });
+    setCurrentMonth(monthName);
+  }
+
+  const loadUsers = async () => {
+    fetch('/api/admin/users', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      }
+    }).then(res => res.json())
+      .then(body => {        
+        console.log("body.users: ", body.users);
+        const users = body.users;
+        setUsers(users);
+        calculateTotalUsers(users.length);
+        calculateNewUsersCurrentMonth(users);
+      });
+  }
+
+  const calculateTotalUsers = (usersLength) => {
+    setTotalUsers(usersLength);
+  }
+
+  const calculateNewUsersCurrentMonth = (users) => {
+    // Gets the current date
+    const currentDate = new Date();
+
+    // Calculate the first day of the current month
+    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);    
+
+    // Filter users created since the start of the current month
+    const newUsersCurrentMonth = users.filter(user => {
+      const userCreatedAt = new Date(user.createdAt);
+      return userCreatedAt >= firstDayCurrentMonth;
+    });
+
+    setNewUsersCurrentMonth(newUsersCurrentMonth.length);
+  }
+
+  const loadPosts = () => {
+    fetch('/api/admin/post', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      }
+    }).then(res => res.json())
+      .then(body => {        
+        console.log("body.posts: ", body.posts);
+        const posts = body.posts
+        setPosts(posts); 
+        calculateTotalPosts(posts.length);
+        calculateNewPostsCurrentMonth(posts);
+      });
+  }
+
+  const calculateTotalPosts = (postsLength) => {
+    setTotalPosts(postsLength);
+  }
+
+  const calculateNewPostsCurrentMonth = (posts) => {
+    // Gets the current date
+    const currentDate = new Date();
+
+    // Calculate the first day of the current month
+    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);    
+
+    // Filter posts created since the start of the current month
+    const newPostsCurrentMonth = posts.filter(post => {
+      const postCreatedAt = new Date(post.createdAt);
+      return postCreatedAt >= firstDayCurrentMonth;
+    });
+
+    setNewPostsCurrentMonth(newPostsCurrentMonth.length);
+  }
+
+  useEffect(() => {
+    // Call loadUsers when the component mounts
+    loadUsers();
+    // Call loadPosts when the component mounts
+    loadPosts();
+    // Call getCurrentMonth when the component mounts
+    getCurrentMonth();
+  }, []);
+
   return (
     <>
       <div className="header pb-6" style={{
-          backgroundColor: "#1B2A72"}}>
+        backgroundColor: "#1B2A72"
+      }}>
         <Container fluid>
           <div className="header-body">
             <Row className="align-items-center py-4">
@@ -91,51 +193,23 @@ function CardsHeader({ name, parentName }) {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Total traffic
+                          Total users
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
-                          350,897
+                          {totalUsers}
                         </span>
                       </div>
-                      <Col className="col-auto">
-                        <div className="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
-                          <i className="ni ni-active-40" />
-                        </div>
-                      </Col>
-                    </Row>
-                    <p className="mt-3 mb-0 text-sm">
-                      <span className="text-success mr-2">
-                        <i className="fa fa-arrow-up" /> 3.48%
-                      </span>{" "}
-                      <span className="text-nowrap">Since last month</span>
-                    </p>
-                  </CardBody>
-                </Card>
-              </Col>
-              <Col md="6" xl="3">
-                <Card className="card-stats">
-                  <CardBody>
-                    <Row>
-                      <div className="col">
-                        <CardTitle
-                          tag="h5"
-                          className="text-uppercase text-muted mb-0"
-                        >
-                          New users
-                        </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">2,356</span>
-                      </div>
-                      <Col className="col-auto">
+                      <Col className="col-auto">                        
                         <div className="icon icon-shape bg-gradient-yellow rounded-circle shadow ">
                           <i className="fas fa-user" />
                         </div>
                       </Col>
                     </Row>
                     <p className="mt-3 mb-0 text-sm">
-                      <span className="text-success mr-2">
+                      {/* <span className="text-success mr-2">
                         <i className="fa fa-arrow-up" /> 3.48%
                       </span>{" "}
-                      <span className="text-nowrap">Since last month</span>
+                      <span className="text-nowrap">Since last month</span> */}
                     </p>
                   </CardBody>
                 </Card>
@@ -149,21 +223,51 @@ function CardsHeader({ name, parentName }) {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          No of Post
+                          New users in {currentMonth}
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">924</span>
+                        <span className="h2 font-weight-bold mb-0">
+                          {newUsersCurrentMonth}
+                        </span>
+                      </div>
+                      <Col className="col-auto">
+                        <div className="icon icon-shape bg-gradient-purple text-white rounded-circle shadow">
+                          <i className="fas fa-user-plus"></i>
+                        </div>
+                      </Col>
+                    </Row>
+                    <p className="mt-3 mb-0 text-sm">
+                      {/* <span className="text-success mr-2">
+                        <i className="fa fa-arrow-up" /> 3.48%
+                      </span>{" "}
+                      <span className="text-nowrap">Since last month</span> */}
+                    </p>
+                  </CardBody>
+                </Card>
+              </Col>
+              <Col md="6" xl="3">
+                <Card className="card-stats">
+                  <CardBody>
+                    <Row>
+                      <div className="col">
+                        <CardTitle
+                          tag="h5"
+                          className="text-uppercase text-muted mb-0"
+                        >
+                          Total Posts
+                        </CardTitle>
+                        <span className="h2 font-weight-bold mb-0">{totalPosts}</span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-gradient-green text-white shadow ">
-                          <i className="fas fa-pencil-alt" />
+                          <i className="fas fa-file-alt"></i>
                         </div>
                       </Col>
                     </Row>
                     <p className="mt-3 mb-0 text-sm">
-                      <span className="text-success mr-2">
+                      {/* <span className="text-success mr-2">
                         <i className="fa fa-arrow-up" /> 3.48%
                       </span>{" "}
-                      <span className="text-nowrap">Since last month</span>
+                      <span className="text-nowrap">Since last month</span> */}
                     </p>
                   </CardBody>
                 </Card>
@@ -177,21 +281,23 @@ function CardsHeader({ name, parentName }) {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Performance
+                          New Posts in {currentMonth}
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">49,65%</span>
+                        <span className="h2 font-weight-bold mb-0">
+                          {newPostsCurrentMonth}
+                          </span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                          <i className="ni ni-chart-bar-32" />
+                        <i className="fas fa-file-medical"></i>
                         </div>
                       </Col>
                     </Row>
                     <p className="mt-3 mb-0 text-sm">
-                      <span className="text-success mr-2">
+                      {/* <span className="text-success mr-2">
                         <i className="fa fa-arrow-up" /> 3.48%
                       </span>{" "}
-                      <span className="text-nowrap">Since last month</span>
+                      <span className="text-nowrap">Since last month</span> */}
                     </p>
                   </CardBody>
                 </Card>

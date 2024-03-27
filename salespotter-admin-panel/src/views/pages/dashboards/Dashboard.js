@@ -14,7 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useState, useEffect } from "react";
 // node.js library that concatenates classes (strings)
 import classnames from "classnames";
 // javascipt plugin for creating charts
@@ -61,6 +61,30 @@ import {
 
 
 function Dashboard() {
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU0NzkwNSwiZXhwIjoxNzExNjM0MzA1fQ.nNMIfHZyiDoRUHpx2P17CR8-MlLp5AYSQTD9kBQNonw';  
+  const [posts, setPosts] = useState([]);
+
+  const loadPosts = () => {
+    fetch('/api/admin/post', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      }
+    }).then(res => res.json())
+      .then(body => {        
+        console.log("body.posts: ", body.posts);
+        const posts = body.posts
+        setPosts(posts); 
+      });
+  }  
+
+  useEffect(() => {    
+    // Call loadPosts when the component mounts
+    loadPosts();
+  }, []);
+
+
   const [activeNav, setActiveNav] = React.useState(1);
   const [chartExample1Data, setChartExample1Data] = React.useState("data1");
   const toggleNavs = (e, index) => {
