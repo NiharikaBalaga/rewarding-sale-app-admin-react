@@ -30,6 +30,8 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/vendor/nucleo/css/nucleo.css";
 // core styles
 import "assets/scss/argon-dashboard-pro-react.scss?v1.2.1";
+// custom css
+import "assets/css/style.css";
 
 import AdminLayout from "layouts/Admin.js";
 import RTLLayout from "layouts/RTL.js";

@@ -14,7 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 // react plugin that prints a given react component
 import ReactToPrint from "react-to-print";
@@ -74,189 +74,236 @@ const { SearchBar } = Search;
 function Posts() {
   const [alert, setAlert] = React.useState(null);
   const componentRef = React.useRef(null);
-  // this function will copy to clipboard an entire table,
-  // so you can paste it inside an excel or csv file
-  const copyToClipboardAsTable = (el) => {
-    var body = document.body,
-      range,
-      sel;
-    if (document.createRange && window.getSelection) {
-      range = document.createRange();
-      sel = window.getSelection();
-      sel.removeAllRanges();
-      try {
-        range.selectNodeContents(el);
-        sel.addRange(range);
-      } catch (e) {
-        range.selectNode(el);
-        sel.addRange(range);
+
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQ5NzA1MiwiZXhwIjoxNzExNTgzNDUyfQ.JNATBG29CoJG2lAfr_puS7M8F3lsfiaoVULPm8woagI';
+  const [posts, setPosts] = useState([]);
+
+  const loadData = () => {
+    fetch('/api/admin/post', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
       }
-      document.execCommand("copy");
-    } else if (body.createTextRange) {
-      range = body.createTextRange();
-      range.moveToElementText(el);
-      range.select();
-      range.execCommand("Copy");
-    }
-    setAlert(
-      <ReactBSAlert
-        success
-        style={{ display: "block", marginTop: "-100px" }}
-        title="Good job!"
-        onConfirm={() => setAlert(null)}
-        onCancel={() => setAlert(null)}
-        confirmBtnBsStyle="info"
-        btnSize=""
-      >
-        Copied to clipboard!
-      </ReactBSAlert>
-    );
-  };
+    }).then(res => res.json())
+      .then(body => {
+        console.log("body posts: ", body);
+        console.log("body.posts: ", body.posts);
+        setPosts(body.posts); // Update the state with fetched users
+      });
+  }
+
+  useEffect(() => {
+    // Call loadData when the component mounts
+    loadData();
+  }, []);
+
+  const blockPost = (postId) => {
+    console.log("userId: ", postId);
+    fetch('/api/admin/post/block', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({ postId: postId })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Post blocked:', data);
+        // Optionally refresh the users list here
+        loadData();
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  }
 
   return (
     <>
-    {alert}
-    <SimpleHeader name="Posts" parentName="Posts" />
-    <Container className="mt--6" fluid>
+      {alert}
+      <SimpleHeader name="Posts" parentName="Posts" />
+      <Container className="mt--6" fluid>
         <Row>
-            <div className="col">
-                <Card>
-                    <CardHeader>
-                        <h3 className="mb-0">Posts</h3>
-                    </CardHeader>
-                    <ToolkitProvider
-                        data={dataTable}
-                        keyField="name"
-                        columns={[
-                            /* Product name */
-                            {
-                              dataField: "name",
-                              text: "Product name",
-                              sort: true,
-                              formatter: (cell, row, rowIndex) => (
-                                <div>
-                                    {rowIndex % 2 === 0 ? (
-                                        <img
-                                        alt="..."
-                                        className="avatar rounded-circle mr-3"
-                                        src={require("assets/img/theme/team-3.jpg")}
-                                        />
-                                    ) : (
-                                        <img
-                                        alt="..."
-                                        className="avatar rounded-circle mr-3"
-                                        src={require("assets/img/theme/team-4.jpg")}
-                                        />
-                                    )}
-                                    <b>{cell}</b>
-                                </div>
-                              )
-                            },
-                            /* File name */
-                            {
-                                dataField: "position",
-                                text: "File name",
-                                sort: true,
-                            },
-                            /* Location */
-                            {
-                                dataField: "office",
-                                text: "Location",
-                                sort: true,
-                            },
-                            /* Old price */
-                            {
-                                dataField: "salary",
-                                text: "Old price",
-                                sort: true,
-                            },
-                            /* Old quantity */
-                            {
-                                dataField: "age",
-                                text: "Old quantity",
-                                sort: true,
-                            },
-                            /* New price */
-                            {
-                                dataField: "salary",
-                                text: "New price",
-                                sort: true,
-                            },
-                            /* New quantity */
-                            {
-                                dataField: "age",
-                                text: "New quantity",
-                                sort: true,
-                            },
-                            /* Description */
-                            {
-                                dataField: "position",
-                                text: "Description",
-                                sort: true,
-                            },
-                            /* Actions */
-                            {
-                                dataField: null,
-                                text: "Actions",
-                                formatter: (cell, row) => (
-                                    <div>
-                                    {/* Edit post icon */}
-                                    <NavLink
-                                        to="/admin/post-edit"
-                                        className="table-action"
-                                        id="tooltip564981685"                                        
-                                    >
-                                        <i className="fas fa-edit" />
-                                    </NavLink>
-                                    <UncontrolledTooltip delay={0} target="tooltip564981685">
-                                        Edit post
-                                    </UncontrolledTooltip>                                    
-                                    {/* Delete post icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065234"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-trash" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Delete post
-                                    </UncontrolledTooltip>
-                                    </div>
-                                )
-                            }
-                        ]}
-                        search
-                    >
-                    {(props) => (
-                        <div className="py-4 table-responsive">
-                        <div
-                            id="datatable-basic_filter"
-                            className="dataTables_filter px-4 pb-1"
-                        >
-                            <label>
-                            Search:
-                            <SearchBar
-                                className="form-control-sm"
-                                placeholder=""
-                                {...props.searchProps}
-                            />
-                            </label>
-                        </div>
-                        <BootstrapTable
-                            {...props.baseProps}
-                            bootstrap4={true}
-                            pagination={pagination}
-                            bordered={false}
+          <div className="col">
+            <Card>
+              <CardHeader>
+                <h3 className="mb-0">Posts</h3>
+              </CardHeader>
+              <ToolkitProvider
+                data={posts}
+                keyField="_id"
+                columns={[
+                  /* Product name */
+                  {
+                    dataField: "productName",
+                    text: "Product name",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => (
+                      <div>
+                        <img
+                          alt="Product_Image"
+                          className="avatar rounded-circle mr-3"
+                          src={row.productImageObjectUrl} // Use the productImageObjectUrl field for the image source
+                          style={{ width: '55px', height: '55px' }} // Adjust size as needed
                         />
+                        <b>{cell}</b>
+                      </div>
+                    )
+                  },
+                  /* Old price */
+                  {
+                    dataField: "oldPrice",
+                    text: "Old price",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Old quantity */
+                  {
+                    dataField: "oldQuantity",
+                    text: "Old quantity",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* New price */
+                  {
+                    dataField: "newPrice",
+                    text: "New price",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* New quantity */
+                  {
+                    dataField: "newQuantity",
+                    text: "New quantity",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Created at */
+                  {
+                    dataField: "createdAt",
+                    text: "Created at",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => {
+                      const dateObj = new Date(cell);
+                      // Converts to YYYY-MM-DD format
+                      const formattedDate = dateObj.toISOString().split('T')[0];
+                      return <span>{formattedDate}</span>;
+                    }
+                  },
+                  /* Status */
+                  {
+                    dataField: "status",
+                    text: "Status",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => {
+                      let badgeClass, statusText;
+
+                      switch (cell) {
+                        case "POST_PUBLISHED":
+                          badgeClass = "bg-success";
+                          statusText = "Published";
+                          break;
+                        case "POST_FAILED":
+                          badgeClass = "bg-danger";
+                          statusText = "Failed";
+                          break;
+                        case "POST_BLOCKED":
+                          badgeClass = "bg-danger";
+                          statusText = "Blocked";
+                          break;
+                        case "POST_DUPLICATE":
+                          badgeClass = "bg-danger";
+                          statusText = "Duplicate";
+                          break;
+                        default:
+                          badgeClass = "";
+                          statusText = "Status not found";
+                      }
+
+                      return (
+                        <div>
+                          <Badge color="" className={`badge-dot mr-4`}>
+                            <i className={badgeClass} />
+                            <span className="status">{statusText}</span>
+                          </Badge>
                         </div>
-                    )}
-                    </ToolkitProvider>
-                </Card>            
-            </div>
+                      );
+                    }
+                  },
+                  /* Actions */
+                  {
+                    dataField: "actions",
+                    text: "Actions",
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => (
+                      <div>
+                        {/* Edit post icon */}
+                        <Link
+                          to={{
+                            pathname: "/admin/post-edit",
+                            state: { post: row } // passing the entire post object as state
+                          }}
+                          className="table-action"
+                          id="tooltip564981685"
+                        >
+                          <i className="fas fa-edit" />
+                        </Link>
+                        <UncontrolledTooltip delay={0} target="tooltip564981685">
+                          Edit post
+                        </UncontrolledTooltip>
+                        {/* Delete post icon */}
+                        <a
+                          className="table-action table-action-delete"
+                          href="#pablo"
+                          id="tooltip601065234"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            blockPost(row._id);
+                          }}
+                        >
+                          <i className="fas fa-ban" />
+                        </a>
+                        <UncontrolledTooltip delay={0} target="tooltip601065234">
+                          Block post
+                        </UncontrolledTooltip>
+                      </div>
+                    )
+                  }
+                ]}
+                search
+              >
+                {(props) => (
+                  <div className="py-4 table-responsive">
+                    <div
+                      id="datatable-basic_filter"
+                      className="dataTables_filter px-4 pb-1"
+                    >
+                      <label>
+                        Search:
+                        <SearchBar
+                          className="form-control-sm"
+                          placeholder=""
+                          {...props.searchProps}
+                        />
+                      </label>
+                    </div>
+                    <BootstrapTable
+                      {...props.baseProps}
+                      bootstrap4={true}
+                      pagination={pagination}
+                      bordered={false}
+                    />
+                  </div>
+                )}
+              </ToolkitProvider>
+            </Card>
+          </div>
         </Row>
-    </Container>
+      </Container>
     </>
   );
 }
