@@ -322,8 +322,8 @@ let chartExample1 = {
           },
           ticks: {
             callback: function (value) {
-              if (!(value % 10)) {
-                return "$" + value + "k";
+              if (!(value % 1)) { // Adjust this if you want different step sizes
+                return value; // Directly return the value without formatting
               }
             },
           },
@@ -336,40 +336,30 @@ let chartExample1 = {
           var label = data.datasets[item.datasetIndex].label || "";
           var yLabel = item.yLabel;
           var content = "";
-
           if (data.datasets.length > 1) {
-            content += label;
+            content += label + ": ";
           }
-
-          content += "$" + yLabel + "k";
+          content += yLabel; // No currency format
           return content;
         },
       },
     },
   },
+  // Replace this with your dynamic data later
   data1: (canvas) => {
     return {
-      labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      // Use the full months names or abbreviations as you prefer
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
       datasets: [
         {
-          label: "Performance",
-          data: [0, 20, 10, 30, 15, 40, 20, 60, 60],
-        },
-      ],
-    };
-  },
-  data2: (canvas) => {
-    return {
-      labels: ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      datasets: [
-        {
-          label: "Performance",
-          data: [0, 20, 5, 25, 10, 30, 15, 40, 40],
+          label: "Posts",
+          data: [10, 20, 15, 50, 40, 60, 70, 80, 90, 85, 80, 100], // Example data
         },
       ],
     };
   },
 };
+
 
 // Example 2 of Chart inside src/views/dashboards/Dashboard.js and src/views/dashboards/Alternative.js and src/views/pages/Charts.js
 let chartExample2 = {
@@ -408,7 +398,7 @@ let chartExample2 = {
     },
   },
   data: {
-    labels: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
     datasets: [
       {
         label: "Sales",

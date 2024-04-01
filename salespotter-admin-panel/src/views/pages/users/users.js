@@ -14,7 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 // react plugin that prints a given react component
 import ReactToPrint from "react-to-print";
@@ -38,9 +38,6 @@ import {
 } from "reactstrap";
 // core components
 import SimpleHeader from "components/Headers/SimpleHeader.js";
-
-import { dataTable } from "variables/general";
-
 
 const pagination = paginationFactory({
   page: 1,
@@ -72,52 +69,57 @@ const pagination = paginationFactory({
 
 const { SearchBar } = Search;
 
-function Users() {
-  const [alert, setAlert] = React.useState(null);
-  const componentRef = React.useRef(null);
-  // this function will copy to clipboard an entire table,
-  // so you can paste it inside an excel or csv file
-  const copyToClipboardAsTable = (el) => {
-    var body = document.body,
-      range,
-      sel;
-    if (document.createRange && window.getSelection) {
-      range = document.createRange();
-      sel = window.getSelection();
-      sel.removeAllRanges();
-      try {
-        range.selectNodeContents(el);
-        sel.addRange(range);
-      } catch (e) {
-        range.selectNode(el);
-        sel.addRange(range);
-      }
-      document.execCommand("copy");
-    } else if (body.createTextRange) {
-      range = body.createTextRange();
-      range.moveToElementText(el);
-      range.select();
-      range.execCommand("Copy");
-    }
-    setAlert(
-      <ReactBSAlert
-        success
-        style={{ display: "block", marginTop: "-100px" }}
-        title="Good job!"
-        onConfirm={() => setAlert(null)}
-        onCancel={() => setAlert(null)}
-        confirmBtnBsStyle="info"
-        btnSize=""
-      >
-        Copied to clipboard!
-      </ReactBSAlert>
-    );
-  };
+function Users() {  
+  const [alert, setAlert] = React.useState(null);  
+  
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
+  const [users, setUsers] = useState([]);
+
+  const loadData = () => {      
+    fetch('/api/admin/users', { 
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      }    
+    }).then(res => res.json())
+    .then(body => {
+      console.log("body: ", body);
+      console.log("body.users: ", body.users);
+      setUsers(body.users); 
+    });
+  }
+
+  useEffect(() => {
+    // Call loadData when the component mounts
+    loadData();
+  }, []);   
+
+  const blockUser = (userId) => {
+    console.log("userId: ", userId);
+    fetch('/api/admin/user/block', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+      body: JSON.stringify({ userId: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('User blocked:', data);
+      // Optionally refresh the users list here
+      loadData();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
 
   return (
     <>
     {alert}
-    <SimpleHeader name="Users" parentName="Users" />
+    <SimpleHeader name="Users" parentName="" />
     <Container className="mt--6" fluid>
         <Row>
             <div className="col">
@@ -126,106 +128,94 @@ function Users() {
                         <h3 className="mb-0">Users</h3>
                     </CardHeader>
                     <ToolkitProvider
-                        data={dataTable}
-                        keyField="name"
+                        data={users}
+                        keyField="_id"
                         columns={[
                             /* Name */
                             {
-                                dataField: "name",
-                                text: "Name",
-                                sort: true,
-                                formatter: (cell, row, rowIndex) => (
-                                    <div>
-                                        {rowIndex % 2 === 0 ? (
-                                            <img
-                                            alt="..."
-                                            className="avatar rounded-circle mr-3"
-                                            src={require("assets/img/theme/team-1.jpg")}
-                                            />
-                                        ) : (
-                                            <img
-                                            alt="..."
-                                            className="avatar rounded-circle mr-3"
-                                            src={require("assets/img/theme/team-2.jpg")}
-                                            />
-                                        )}
-                                        <b>{cell}</b>
-                                    </div>
-                                )
+                              dataField: "name",
+                              text: "Name",
+                              sort: true,
+                              classes: "vertical-align-middle",
+                              formatter: (cell, row, rowIndex) => (
+                                <div>                                  
+                                  <b>{`${row.firstName} ${row.lastName}`}</b>
+                                </div>
+                              )
                             },
                             /* Email address */
                             {
-                                dataField: "position",
+                                dataField: "email",
                                 text: "Email address",
                                 sort: true,
+                                classes: "vertical-align-middle",
                             },
                             /* Phone number */
                             {
-                                dataField: "office",
+                                dataField: "phoneNumber",
                                 text: "Phone number",
                                 sort: true,
+                                classes: "vertical-align-middle",
                             },
                             /* Created at */
                             {
-                                dataField: "start_date",
-                                text: "Created at",
-                                sort: true,
-                            },                            
+                              dataField: "createdAt",
+                              text: "Created at",
+                              sort: true,
+                              classes: "vertical-align-middle",
+                              classes: "vertical-align-middle",
+                              formatter: (cell, row) => {                                
+                                const dateObj = new Date(cell);
+                                // Converts to YYYY-MM-DD format
+                                const formattedDate = dateObj.toISOString().split('T')[0];
+                                return <span>{formattedDate}</span>;
+                              }
+                            },                                                   
                             /* Status */
-                            {                    
-                                text: "Status",
-                                sort: true,
-                                formatter: (cell, row) => (
-                                    <div>
-                                        {cell}
-                                        <Badge color="" className="badge-dot mr-4">
-                                        <i className="bg-success" />
-                                        <span className="status">Active</span>
-                                        </Badge>
-                                    </div>
-                                )
-                            },
+                            {
+                              dataField: "status",
+                              text: "Status",                              
+                              sort: true,
+                              classes: "vertical-align-middle",
+                              formatter: (cell, row) => {
+                                // Determine the badge class based on the signedUp field's value
+                                const badgeClass = !row.isBlocked ? "bg-success" : "bg-danger";
+                            
+                                // Determine the text to display based on the signedUp field's value
+                                const statusText = !row.isBlocked ? "Active" : "Blocked";
+                            
+                                return (
+                                  <div>
+                                    <Badge color="" className={`badge-dot mr-4`}>
+                                      <i className={badgeClass} /> 
+                                      <span className="status">{statusText}</span>
+                                    </Badge>
+                                  </div>
+                                );
+                              }
+                            },                            
                             /* Actions */
                             {
-                                dataField: null,
+                                dataField: "actions",
                                 text: "Actions",
+                                classes: "vertical-align-middle",
                                 formatter: (cell, row) => (
-                                    <div>
-                                    {/* Edit user icon */}                                    
-                                    <NavLink
-                                        to="/admin/user-edit"
-                                        className="table-action"
-                                        id="tooltip564981685"                                        
-                                    >
-                                        <i className="fas fa-edit" />
-                                    </NavLink>
-                                    <UncontrolledTooltip delay={0} target="tooltip564981685">
-                                        Edit user
-                                    </UncontrolledTooltip>
+                                    <div>                                    
                                     {/* Block user icon */}
                                     <a
                                     className="table-action table-action-delete"
                                     href="#pablo"
                                     id="tooltip601065235"
-                                    onClick={(e) => e.preventDefault()}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      blockUser(row._id);
+                                    }}
                                     >
                                         <i className="fas fa-ban" />
                                     </a>
                                     <UncontrolledTooltip delay={0} target="tooltip601065235">
                                         Block user
-                                    </UncontrolledTooltip>
-                                    {/* Delete user icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065234"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-trash" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Delete user
-                                    </UncontrolledTooltip>
+                                    </UncontrolledTooltip>                                    
                                     </div>
                                 )
                             }
