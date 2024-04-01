@@ -67,7 +67,7 @@ const { SearchBar } = Search;
 function Admins() {
   const [alert, setAlert] = React.useState(null);
   const navigate = useNavigate();
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMTUxMTY1OCwiZXhwIjoxNzExNTE1MjU4fQ.jP35-Oz4zc1BZwA4UdV_5r8IPUOjlFpguH7tV50YFAs';
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMTkzMjc3OSwiZXhwIjoxNzExOTM2Mzc5fQ.pm7Y-IqVKsm2U-CQsnOx35gqKraTMGFx_BFVLzN1VDw';
   const [admins, setAdmins] = useState([]); // Initial empty array of users  
 
   const loadData = () => {
@@ -140,7 +140,7 @@ function Admins() {
   return (
     <>
       {alert}
-      <SimpleHeader name="Admins" parentName="Admins" />
+      <SimpleHeader name="Admins" parentName="" />
       <Container className="mt--6" fluid>
         <Row>
           <div className="col">
@@ -159,20 +159,7 @@ function Admins() {
                     sort: true,
                     classes: "vertical-align-middle",
                     formatter: (cell, row, rowIndex) => (
-                      <div>
-                        {rowIndex % 2 === 0 ? (
-                          <img
-                            alt="..."
-                            className="avatar rounded-circle mr-3"
-                            src={require("assets/img/theme/team-1.jpg")}
-                          />
-                        ) : (
-                          <img
-                            alt="..."
-                            className="avatar rounded-circle mr-3"
-                            src={require("assets/img/theme/team-2.jpg")}
-                          />
-                        )}
+                      <div>                        
                         <b>{`${row.firstName} ${row.lastName}`}</b>
                       </div>
                     )

@@ -37,7 +37,7 @@ import SimpleHeader from "components/Headers/SimpleHeader.js";
 function AdminEdit() {
     const location = useLocation();
     const navigate = useNavigate();
-    const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMTUxMTY1OCwiZXhwIjoxNzExNTE1MjU4fQ.jP35-Oz4zc1BZwA4UdV_5r8IPUOjlFpguH7tV50YFAs';
+    const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMTkzMjc3OSwiZXhwIjoxNzExOTM2Mzc5fQ.pm7Y-IqVKsm2U-CQsnOx35gqKraTMGFx_BFVLzN1VDw';
 
     useEffect(() => {
         console.log("location: ", location);
@@ -106,7 +106,7 @@ function AdminEdit() {
 
     return (
         <>
-            <SimpleHeader name="Admin edit" parentName="Admin edit" />
+            <SimpleHeader name="Admin edit" parentName="Admins" />
             <Container className="mt--6" fluid>
                 <Row>
                     <div className="col">

@@ -31,7 +31,7 @@ import {
 } from "reactstrap";
 
 function CardsHeader({ name, parentName }) {
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU0NzkwNSwiZXhwIjoxNzExNjM0MzA1fQ.nNMIfHZyiDoRUHpx2P17CR8-MlLp5AYSQTD9kBQNonw';
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
   const [currentMonth, setCurrentMonth] = useState([]);
   const [users, setUsers] = useState([]);
   const [totalUsers, setTotalUsers] = useState([]);
@@ -57,7 +57,7 @@ function CardsHeader({ name, parentName }) {
         'Authorization': `Bearer ${TOKEN}`,
       }
     }).then(res => res.json())
-      .then(body => {        
+      .then(body => {
         console.log("body.users: ", body.users);
         const users = body.users;
         setUsers(users);
@@ -75,7 +75,7 @@ function CardsHeader({ name, parentName }) {
     const currentDate = new Date();
 
     // Calculate the first day of the current month
-    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);    
+    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
     // Filter users created since the start of the current month
     const newUsersCurrentMonth = users.filter(user => {
@@ -94,10 +94,10 @@ function CardsHeader({ name, parentName }) {
         'Authorization': `Bearer ${TOKEN}`,
       }
     }).then(res => res.json())
-      .then(body => {        
+      .then(body => {
         console.log("body.posts: ", body.posts);
         const posts = body.posts
-        setPosts(posts); 
+        setPosts(posts);
         calculateTotalPosts(posts.length);
         calculateNewPostsCurrentMonth(posts);
       });
@@ -112,7 +112,7 @@ function CardsHeader({ name, parentName }) {
     const currentDate = new Date();
 
     // Calculate the first day of the current month
-    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);    
+    const firstDayCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
     // Filter posts created since the start of the current month
     const newPostsCurrentMonth = posts.filter(post => {
@@ -147,39 +147,21 @@ function CardsHeader({ name, parentName }) {
                   listClassName="breadcrumb-links breadcrumb-dark"
                 >
                   <BreadcrumbItem>
-                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                    <a href="/admin/dashboard">
                       <i className="fas fa-home" />
                     </a>
                   </BreadcrumbItem>
-                  <BreadcrumbItem>
-                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                      {parentName}
-                    </a>
-                  </BreadcrumbItem>
+                  {parentName && parentName.trim() && (
+                    <BreadcrumbItem>
+                      <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                        {parentName}
+                      </a>
+                    </BreadcrumbItem>
+                  )}
                   <BreadcrumbItem aria-current="page" className="active">
                     {name}
                   </BreadcrumbItem>
                 </Breadcrumb>
-              </Col>
-              <Col className="text-right" lg="6" xs="5">
-                <Button
-                  className="btn-neutral"
-                  color="default"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                  size="sm"
-                >
-                  New
-                </Button>
-                <Button
-                  className="btn-neutral"
-                  color="default"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                  size="sm"
-                >
-                  Filters
-                </Button>
               </Col>
             </Row>
 
@@ -199,7 +181,7 @@ function CardsHeader({ name, parentName }) {
                           {totalUsers}
                         </span>
                       </div>
-                      <Col className="col-auto">                        
+                      <Col className="col-auto">
                         <div className="icon icon-shape bg-gradient-yellow rounded-circle shadow ">
                           <i className="fas fa-user" />
                         </div>
@@ -285,11 +267,11 @@ function CardsHeader({ name, parentName }) {
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
                           {newPostsCurrentMonth}
-                          </span>
+                        </span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-gradient-primary text-white rounded-circle shadow">
-                        <i className="fas fa-file-medical"></i>
+                          <i className="fas fa-file-medical"></i>
                         </div>
                       </Col>
                     </Row>

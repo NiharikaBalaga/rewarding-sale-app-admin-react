@@ -72,7 +72,7 @@ const { SearchBar } = Search;
 function Users() {  
   const [alert, setAlert] = React.useState(null);  
   
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQ5NzA1MiwiZXhwIjoxNzExNTgzNDUyfQ.JNATBG29CoJG2lAfr_puS7M8F3lsfiaoVULPm8woagI';
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
   const [users, setUsers] = useState([]);
 
   const loadData = () => {      
@@ -119,7 +119,7 @@ function Users() {
   return (
     <>
     {alert}
-    <SimpleHeader name="Users" parentName="Users" />
+    <SimpleHeader name="Users" parentName="" />
     <Container className="mt--6" fluid>
         <Row>
             <div className="col">
@@ -138,20 +138,7 @@ function Users() {
                               sort: true,
                               classes: "vertical-align-middle",
                               formatter: (cell, row, rowIndex) => (
-                                <div>
-                                  {rowIndex % 2 === 0 ? (
-                                    <img
-                                      alt="..."
-                                      className="avatar rounded-circle mr-3"
-                                      src={require("assets/img/theme/team-1.jpg")}
-                                    />
-                                  ) : (
-                                    <img
-                                      alt="..."
-                                      className="avatar rounded-circle mr-3"
-                                      src={require("assets/img/theme/team-2.jpg")}
-                                    />
-                                  )}
+                                <div>                                  
                                   <b>{`${row.firstName} ${row.lastName}`}</b>
                                 </div>
                               )

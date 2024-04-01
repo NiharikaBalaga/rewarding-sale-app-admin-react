@@ -32,8 +32,8 @@ function TimelineHeader({ name, parentName }) {
   return (
     <>
       <div className="header header-dark pb-6 content__title content__title--calendar" style={{
-          backgroundColor: "#1B2A72"
-        }}>
+        backgroundColor: "#1B2A72"
+      }}>
         <Container fluid>
           <div className="header-body">
             <Row className="align-items-center py-4">
@@ -52,23 +52,17 @@ function TimelineHeader({ name, parentName }) {
                       <i className="fas fa-home" />
                     </NavLink>
                   </BreadcrumbItem>
-                  <BreadcrumbItem>
-                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                      {parentName}
-                    </a>
-                  </BreadcrumbItem>
+                  {parentName && parentName.trim() && (
+                    <BreadcrumbItem>
+                      <a href={`/admin/${parentName.trim()}`}>
+                        {parentName}
+                      </a>
+                    </BreadcrumbItem>
+                  )}
                   <BreadcrumbItem aria-current="page" className="active">
                     {name}
                   </BreadcrumbItem>
                 </Breadcrumb>
-              </Col>
-              <Col className="mt-3 mt-md-0 text-md-right" lg="6" xs="5">
-                <Button className="btn-neutral" color="default" size="sm">
-                  New
-                </Button>
-                <Button className="btn-neutral" color="default" size="sm">
-                  Filters
-                </Button>
               </Col>
             </Row>
           </div>

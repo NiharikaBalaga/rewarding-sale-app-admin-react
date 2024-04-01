@@ -67,7 +67,7 @@ const { SearchBar } = Search;
 function Posts() {
   const [alert, setAlert] = React.useState(null);  
   const navigate = useNavigate();
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTUxMjY4MCwiZXhwIjoxNzExNTk5MDgwfQ.Upr94H7nZr7kLIqxWbddlS9FccgulGwhntNHBZYODow';
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
   const [posts, setPosts] = useState([]);
   
   const handleEditClick = (post) => {
@@ -120,7 +120,7 @@ function Posts() {
   return (
     <>
       {alert}
-      <SimpleHeader name="Posts" parentName="Posts" />
+      <SimpleHeader name="Posts" parentName="" />
       <Container className="mt--6" fluid>
         <Row>
           <div className="col">

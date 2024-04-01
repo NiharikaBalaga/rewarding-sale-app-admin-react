@@ -23,7 +23,7 @@ function AdminFooter() {
               </div>
             </Col>
             <Col lg="6">
-              <Nav className="nav-footer justify-content-center justify-content-lg-end">
+              {/* <Nav className="nav-footer justify-content-center justify-content-lg-end">
                 <NavItem>
                   <NavLink
                     href="https://wwww.salespotter.com"
@@ -56,7 +56,7 @@ function AdminFooter() {
                     License
                   </NavLink>
                 </NavItem>
-              </Nav>
+              </Nav> */}
             </Col>
           </Row>
         </footer>

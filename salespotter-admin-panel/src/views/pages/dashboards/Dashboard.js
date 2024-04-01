@@ -93,25 +93,73 @@ const pagination = paginationFactory({
 const { SearchBar } = Search;
 
 function Dashboard() {
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU0NzkwNSwiZXhwIjoxNzExNjM0MzA1fQ.nNMIfHZyiDoRUHpx2P17CR8-MlLp5AYSQTD9kBQNonw';
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [postsChartData, setPostsChartData] = useState({});
   const [usersChartData, setUsersChartData] = useState({});
+  /* const [postsReportsVotes, setPostsReportsVotes] = useState([]);
 
-  /* const loadPosts = async () => {
-    const response = await fetch('/api/admin/post', {
+  const fetchVoteCounts = async (postId) => {
+    const response = await fetch(`/api/report/${postId}/counts`, {
       method: 'GET',
       headers: {
-        'content-type': 'application/json',
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${TOKEN}`,
       },
     });
     const body = await response.json();
-    console.log("body.posts: ", body.posts);
-    setPosts(body.posts);
-    aggregatePostsByMonth(body.posts); // Process posts for chart data
+    return body.postVoteCount; // Assuming this returns the total votes count
+  };
+
+  const fetchReportCounts = async (postId) => {
+    const response = await fetch(`/api/vote/${postId}/votes/count`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    });
+    const body = await response.json();
+    return body.reduce((acc, report) => ({
+      ...acc,
+      ...report,
+    }), {}); // Transform the array of reports into an object
+  };
+
+  const enhancePostsWithVotesAndReports = async (posts) => {
+    const postsWithVotesAndReports = await Promise.all(posts.map(async (post) => {
+      const postVotesCount = await fetchVoteCounts(post._id);
+      console.log("postVotesCount: ", postVotesCount);
+      const {
+        MISLEADING: postMisleadingReportsCount = 0,
+        OUT_OF_STOCK: postOutOfStockReportsCount = 0,
+        NOT_FOUND: postNotFoundReportsCount = 0,
+        CONFIRMATION: postConfirmationReportsCount = 0,
+      } = await fetchReportCounts(post._id);
+
+      return {
+        ...post,
+        postVotesCount,
+        postTotalReportsCount: postMisleadingReportsCount + postOutOfStockReportsCount + postNotFoundReportsCount + postConfirmationReportsCount,
+        postMisleadingReportsCount,
+        postOutOfStockReportsCount,
+        postNotFoundReportsCount,
+        postConfirmationReportsCount,
+      };
+    }));
+
+    setPostsReportsVotes(postsWithVotesAndReports);
+  };
+
+  // Then call this function after loading posts
+  const loadPostsAndEnhance = async () => {
+    const posts = await loadPosts(); // Assuming this function has been adjusted to return the posts
+    const enhancedPosts = await enhancePostsWithVotesAndReports(posts);
+    setPosts(enhancedPosts);
+    console.log("enhancedPosts: ", enhancedPosts);
   }; */
+
   const loadPosts = async () => {
     const response = await fetch('/api/admin/post', {
       method: 'GET',
@@ -144,19 +192,6 @@ function Dashboard() {
     updatePostChartData(postsPerMonth);
   };
 
-  /* const loadUsers = async () => {
-    const response = await fetch('/api/admin/users', {
-      method: 'GET',
-      headers: {
-        'content-type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`,
-      },
-    });
-    const body = await response.json();
-    console.log("body.users: ", body.users);
-    setUsers(body.users);
-    aggregateUsersByMonth(body.users); // Process users for chart data
-  }; */
   const loadUsers = async () => {
     const response = await fetch('/api/admin/users', {
       method: 'GET',
@@ -228,46 +263,24 @@ function Dashboard() {
     }, {});
   };
 
-  // Call this function inside `loadUsers` after you set the users in the state
-  /* const loadUsersWithPostCount = async () => {
-    console.log("loadUsersWithPostCount");
-    // Wait for both posts and users to load
-    await Promise.all([loadPosts(), loadUsers()]); // This will also process chart data
-
-    // Use the state directly since it should be updated now
-    const postCountPerUser = countPostsPerUser(posts);
-
-    console.log("postCountPerUser: ", postCountPerUser);
-
-    // Map over the users and add postCount property to each
-    const usersWithPostCount = users.map(user => ({
-      ...user,
-      postCount: postCountPerUser[user._id] || 0,
-    }));
-
-    console.log("usersWithPostCount: ", usersWithPostCount);
-
-    // Update the state with the new users array
-    setUsers(usersWithPostCount);
-  }; */
   const loadUsersWithPostCount = async () => {
     console.log("loadUsersWithPostCount");
     // Wait for both posts and users to load
     const [loadedPosts, loadedUsers] = await Promise.all([loadPosts(), loadUsers()]);
-  
+
     // Use the loaded posts to count them per user
     const postCountPerUser = countPostsPerUser(loadedPosts);
-  
+
     console.log("postCountPerUser: ", postCountPerUser);
-  
+
     // Map over the loaded users and add postCount property to each
     const usersWithPostCount = loadedUsers.map(user => ({
       ...user,
       postCount: postCountPerUser[user._id] || 0,
     }));
-  
+
     console.log("usersWithPostCount: ", usersWithPostCount);
-  
+
     // Update the state with the new users array
     setUsers(usersWithPostCount);
   };
@@ -295,7 +308,7 @@ function Dashboard() {
   }
   return (
     <>
-      <CardsHeader name="Dashboard" parentName="Dashboards" />
+      <CardsHeader name="Dashboards" parentName="" />
       <Container className="mt--6" fluid>
         <Row>
           <Col xl="6">
@@ -350,105 +363,7 @@ function Dashboard() {
               </CardBody>
             </Card>
           </Col>
-        </Row>
-        <Row>
-          <Col xl="4">
-            <Card>
-              <CardHeader>
-                <h5 className="h3 mb-0">Post Report</h5>
-              </CardHeader>
-
-              <CardBody>
-                <ListGroup className="list my--3" flush>
-                  <ListGroupItem className="px-0">
-                    <Row className="align-items-center">
-                      <Col className="col-auto">
-                        <a
-                          className="avatar rounded-circle"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <img
-                            alt="..."
-                            src={require("assets/img/brand/likes.png")}
-                          />
-                        </a>
-                      </Col>
-                      <div className="col">
-                        <h5>Upvotes</h5>
-                        <Progress
-                          className="progress-xs mb-0"
-                          color="success"
-                          max="100"
-                          value="100"
-                        />
-                      </div>
-                    </Row>
-                  </ListGroupItem>
-                  <ListGroupItem className="px-0">
-                    <Row className="align-items-center">
-                      <Col className="col-auto">
-                        <a
-                          className="avatar rounded-circle"
-                          href="#pablo"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          <img
-                            alt="..."
-                            src={require("assets/img/brand/wrong.jpg")}
-                          />
-                        </a>
-                      </Col>
-                      <div className="col">
-                        <h5>Reports</h5>
-                        <Progress
-                          className="progress-xs mb-0"
-                          color="danger"
-                          max="100"
-                          value="72"
-                        />
-                      </div>
-                    </Row>
-                  </ListGroupItem>
-                </ListGroup>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col xl="8">
-            <div className="card-deck">
-              <Card className="bg-gradient-danger">
-                <CardBody>
-                  <Row className="justify-content-between align-items-center">
-                    <div className="col">
-
-                      <img className="avatar avatar"
-                        alt="..."
-                        src={require("assets/img/brand/salespotterlogo.png")}
-                      />
-                    </div>
-                  </Row>
-                  <div className="my-4">
-                    <span className="h3 surtitle text-light">User having higher Reward points</span>
-                    <div >
-                      <span className="h1 text-white">Pokordi Rajan</span>
-                      <img className="avatar avatar rounded-circle"
-                        alt="..."
-                        src={require("assets/img/theme/team-4.jpg")} />
-
-                    </div>
-                  </div>
-                  <Row>
-                    <div className="col">
-                      <span className="h4 surtitle text-light">Reward Points</span>
-                      <span className="d-block h2 text-white">300</span>
-
-                    </div>
-                  </Row>
-                </CardBody>
-              </Card>
-            </div>
-          </Col>
-        </Row>
+        </Row>        
         <Row>
           <div className="col">
             <Card>
@@ -466,20 +381,7 @@ function Dashboard() {
                     sort: true,
                     classes: "vertical-align-middle",
                     formatter: (cell, row, rowIndex) => (
-                      <div>
-                        {rowIndex % 2 === 0 ? (
-                          <img
-                            alt="..."
-                            className="avatar rounded-circle mr-3"
-                            src={require("assets/img/theme/team-1.jpg")}
-                          />
-                        ) : (
-                          <img
-                            alt="..."
-                            className="avatar rounded-circle mr-3"
-                            src={require("assets/img/theme/team-2.jpg")}
-                          />
-                        )}
+                      <div>                        
                         <b>{`${row.firstName} ${row.lastName}`}</b>
                       </div>
                     )

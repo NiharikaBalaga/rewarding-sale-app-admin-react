@@ -36,7 +36,7 @@ import SimpleHeader from "components/Headers/SimpleHeader.js";
 function PostEdit() {
   const location = useLocation();
   const navigate = useNavigate();
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWNiMGRiMzI1NWViMDdhOThhZjYiLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTQ5NzA1MiwiZXhwIjoxNzExNTgzNDUyfQ.JNATBG29CoJG2lAfr_puS7M8F3lsfiaoVULPm8woagI';  
+  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU3MzkyOCwiZXhwIjoxNzExNjYwMzI4fQ.kJ2JPLbn9xc2JD7X1FuAu48Ycv_rRRQNFzD6xXMYApk';  
 
   useEffect(() => {
     // If statement that checks if the location has the props with the post values
@@ -106,7 +106,7 @@ function PostEdit() {
 
   return (
     <>
-      <SimpleHeader name="Post edit" parentName="Post edit" />
+      <SimpleHeader name="Post edit" parentName="Posts" />
       <Container className="mt--6" fluid>
         <Row>
           <div className="col">
