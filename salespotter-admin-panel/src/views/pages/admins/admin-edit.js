@@ -37,7 +37,7 @@ import SimpleHeader from "components/Headers/SimpleHeader.js";
 function AdminEdit() {
     const location = useLocation();
     const navigate = useNavigate();
-    const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjY5OTI2MSwiZXhwIjoxNzEyNzAyODYxfQ.WlbuEBBUnM8E7jNV8ZA-5mLH3Rvl4NZ0qtIPPNjRLLI';
+    const TOKEN = location.state.token;
 
     useEffect(() => {
         console.log("location: ", location);

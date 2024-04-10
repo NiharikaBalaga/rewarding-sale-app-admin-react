@@ -45,13 +45,12 @@ function Login() {
   const navigate = useNavigate();
 
   const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjcxNjk2MSwiZXhwIjoxNzEyNzIwNTYxfQ.YFtH3zLl9fmiCHkD_SIcVhiSupC66bqoUS0XDmMXLLs";
-  const handleLogin = () => {
-    // Replace with your actual login endpoint
+  const handleLogin = () => {    
     fetch('/api/admin/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`, // Your super admin token
+        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`, 
       },
       body: JSON.stringify({ email, password })
     })

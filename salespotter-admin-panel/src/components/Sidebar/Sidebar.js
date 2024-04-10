@@ -23,6 +23,7 @@ import classnames from "classnames";
 import { PropTypes } from "prop-types";
 // react library that creates nice scrollbar on windows devices
 import PerfectScrollbar from "react-perfect-scrollbar";
+import { useNavigate } from 'react-router-dom';
 // reactstrap components
 import {
   Collapse,
@@ -34,8 +35,11 @@ import {
 } from "reactstrap";
 
 function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
+  const TOKEN = localStorage.getItem('accessToken');
+
   const [state, setState] = React.useState({});
   const location = useLocation();
+  const navigate = useNavigate();  
   React.useEffect(() => {
     setState(getCollapseStates(routes));
     // eslint-disable-next-line
@@ -92,75 +96,100 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
       toggleSidenav();
     }
   };
+
+
+  const handleLogout = () => {
+    console.log("TOKEN: ", TOKEN);
+    // Replace with your actual login endpoint
+    fetch('/api/admin/logout', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    })
+      .then(response => response.text())
+      .then(data => {
+        console.log("handleLogout data: ", data);
+        localStorage.removeItem('accessToken');
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+      });
+  };
+
+
   // this function creates the links and collapses that appear in the sidebar (left menu)
   const createLinks = (routes) => {
     return routes
       .filter((prop) => prop.showInSidebar !== false)
       .map((prop, key) => {
-      if (prop.redirect) {
-        return null;
-      }
-      if (prop.collapse) {
-        var st = {};
-        st[prop["state"]] = !state[prop.state];
+        if (prop.redirect) {
+          return null;
+        }
+        if (prop.collapse) {
+          var st = {};
+          st[prop["state"]] = !state[prop.state];
+          return (
+            <NavItem key={key}>
+              <NavLink
+                href="#pablo"
+                data-toggle="collapse"
+                aria-expanded={state[prop.state]}
+                className={classnames({
+                  active: getCollapseInitialState(prop.views),
+                })}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setState(st);
+                }}
+              >
+                {prop.icon ? (
+                  <>
+                    <i className={prop.icon} />
+                    <span className="nav-link-text">{prop.name}</span>
+                  </>
+                ) : prop.miniName ? (
+                  <>
+                    <span className="sidenav-mini-icon"> {prop.miniName} </span>
+                    <span className="sidenav-normal"> {prop.name} </span>
+                  </>
+                ) : null}
+              </NavLink>
+              <Collapse isOpen={state[prop.state]}>
+                <Nav className="nav-sm flex-column">
+                  {createLinks(prop.views)}
+                </Nav>
+              </Collapse>
+            </NavItem>
+          );
+        }
         return (
-          <NavItem key={key}>
+          <NavItem className={activeRoute(prop.layout + prop.path)} key={key}>
             <NavLink
-              href="#pablo"
-              data-toggle="collapse"
-              aria-expanded={state[prop.state]}
-              className={classnames({
-                active: getCollapseInitialState(prop.views),
-              })}
-              onClick={(e) => {
-                e.preventDefault();
-                setState(st);
-              }}
+              to={prop.layout + prop.path}
+              onClick={closeSidenav}
+              tag={NavLinkRRD}
             >
-              {prop.icon ? (
+              {prop.icon !== undefined ? (
                 <>
                   <i className={prop.icon} />
                   <span className="nav-link-text">{prop.name}</span>
                 </>
-              ) : prop.miniName ? (
+              ) : prop.miniName !== undefined ? (
                 <>
                   <span className="sidenav-mini-icon"> {prop.miniName} </span>
                   <span className="sidenav-normal"> {prop.name} </span>
                 </>
-              ) : null}
+              ) : (
+                prop.name
+              )}
             </NavLink>
-            <Collapse isOpen={state[prop.state]}>
-              <Nav className="nav-sm flex-column">
-                {createLinks(prop.views)}
-              </Nav>
-            </Collapse>
           </NavItem>
         );
-      }
-      return (
-        <NavItem className={activeRoute(prop.layout + prop.path)} key={key}>
-          <NavLink
-            to={prop.layout + prop.path}
-            onClick={closeSidenav}
-            tag={NavLinkRRD}
-          >
-            {prop.icon !== undefined ? (
-              <>
-                <i className={prop.icon} />
-                <span className="nav-link-text">{prop.name}</span>
-              </>
-            ) : prop.miniName !== undefined ? (
-              <>
-                <span className="sidenav-mini-icon"> {prop.miniName} </span>
-                <span className="sidenav-normal"> {prop.name} </span>
-              </>
-            ) : (
-              prop.name
-            )}
-          </NavLink>
-        </NavItem>
-      );
-    });
+      });
   };
 
   let navbarBrandProps;
@@ -209,8 +238,8 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
           <h6 className="navbar-heading p-0 text-muted">
             <span className="docs-normal">OTHER OPTIONS</span>
             <span className="docs-mini">D</span>
-          </h6>          
-          <Nav className="mb-md-3" navbar>            
+          </h6>
+          <Nav className="mb-md-3" navbar>
             <NavItem>
               <NavLink
                 to="/admin/users" tag={Link}
@@ -237,16 +266,14 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
             </NavItem>
             <NavItem>
               <NavLink
-                to="/admin/admins" tag={Link}              
+                to="/admin/admins" tag={Link}
               >
                 <i className="ni ni-ui-04 text-primary" />
                 <span className="nav-link-text">Super Admin</span>
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink
-                to="/admin/dashboard" tag={Link}
-              >
+              <NavLink href="#" onClick={handleLogout}>
                 <i className="ni ni-user-run text-primary" />
                 <span className="nav-link-text">Logout</span>
               </NavLink>
