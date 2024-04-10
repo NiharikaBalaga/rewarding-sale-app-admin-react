@@ -37,79 +37,76 @@ import {
 import AuthHeader from "components/Headers/AuthHeader.js";
 
 function Register() {
-  const [focusedName, setfocusedName] = React.useState(false);
+  const [focusedFirstName, setfocusedFirstName] = React.useState(false);
+  const [focusedLastName, setfocusedLastName] = React.useState(false);
   const [focusedEmail, setfocusedEmail] = React.useState(false);
-  const [focusedPassword, setfocusedPassword] = React.useState(false);
+  const [focusedPhone, setfocusedPhone] = React.useState(false);
+
+//todo: añadir un nuevo campo con la contraseña especial y otro para el password, estaran ocultos hasta que se le de click acrear cuenta y se consuma bien el servicio
+
   return (
     <>
       <AuthHeader
         title="Create an account"
-        lead="Use these awesome forms to login or create new account in your project for free."
+        lead=""
       />
       <Container className="mt--8 pb-5">
         <Row className="justify-content-center">
           <Col lg="6" md="8">
             <Card className="bg-secondary border-0">
-              <CardHeader className="bg-transparent pb-5">
-                <div className="text-muted text-center mt-2 mb-4">
-                  <small>Sign up with</small>
-                </div>
-                <div className="text-center">
-                  <Button
-                    className="btn-neutral btn-icon mr-4"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="btn-inner--icon mr-1">
-                      <img
-                        alt="..."
-                        src={
-                          require("assets/img/icons/common/github.svg").default
-                        }
-                      />
-                    </span>
-                    <span className="btn-inner--text">Github</span>
-                  </Button>
-                  <Button
-                    className="btn-neutral btn-icon"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="btn-inner--icon mr-1">
-                      <img
-                        alt="..."
-                        src={
-                          require("assets/img/icons/common/google.svg").default
-                        }
-                      />
-                    </span>
-                    <span className="btn-inner--text">Google</span>
-                  </Button>
-                </div>
-              </CardHeader>
               <CardBody className="px-lg-5 py-lg-5">
-                <div className="text-center text-muted mb-4">
-                  <small>Or sign up with credentials</small>
+                <div className="text-center mt-2 mb-3">
+                  {/* Display the image directly */}
+                  <img
+                    alt="Descriptive alt text"
+                    src={require("assets/img/brand/salespotteradmin_nobg.png")}
+                    style={{ maxWidth: '250px' }} // Example size, adjust as needed
+                  />
                 </div>
+                {/* Alert error */}
+                {/* {loginError && (
+                  <div className="text-center mb-3">
+                    <Alert color="danger" style={{ backgroundColor: '#a11402', padding: '0.7rem 1rem', borderColor: '#780000' }}>
+                      {loginError}
+                    </Alert>
+                  </div>
+                )} */}
                 <Form role="form">
                   <FormGroup
                     className={classnames({
-                      focused: focusedName,
+                      focused: focusedFirstName,
                     })}
                   >
                     <InputGroup className="input-group-merge input-group-alternative mb-3">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>
-                          <i className="ni ni-hat-3" />
+                          <i className="fas fa-user" />
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
-                        placeholder="Name"
+                        placeholder="First Name..."
                         type="text"
-                        onFocus={() => setfocusedName(true)}
-                        onBlur={() => setfocusedName(false)}
+                        onFocus={() => setfocusedFirstName(true)}
+                        onBlur={() => setfocusedFirstName(false)}
+                      />
+                    </InputGroup>
+                  </FormGroup>
+                  <FormGroup
+                    className={classnames({
+                      focused: focusedLastName,
+                    })}
+                  >
+                    <InputGroup className="input-group-merge input-group-alternative mb-3">
+                      <InputGroupAddon addonType="prepend">
+                        <InputGroupText>
+                          <i className="fas fa-user" />
+                        </InputGroupText>
+                      </InputGroupAddon>
+                      <Input
+                        placeholder="Last Name..."
+                        type="text"
+                        onFocus={() => setfocusedLastName(true)}
+                        onBlur={() => setfocusedLastName(false)}
                       />
                     </InputGroup>
                   </FormGroup>
@@ -125,7 +122,7 @@ function Register() {
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
-                        placeholder="Email"
+                        placeholder="Email..."
                         type="email"
                         onFocus={() => setfocusedEmail(true)}
                         onBlur={() => setfocusedEmail(false)}
@@ -134,58 +131,25 @@ function Register() {
                   </FormGroup>
                   <FormGroup
                     className={classnames({
-                      focused: focusedPassword,
+                      focused: focusedPhone,
                     })}
                   >
                     <InputGroup className="input-group-merge input-group-alternative">
                       <InputGroupAddon addonType="prepend">
                         <InputGroupText>
-                          <i className="ni ni-lock-circle-open" />
+                          <i className="fas fa-phone" />
                         </InputGroupText>
                       </InputGroupAddon>
                       <Input
-                        placeholder="Password"
-                        type="password"
-                        onFocus={() => setfocusedPassword(true)}
-                        onBlur={() => setfocusedPassword(false)}
+                        placeholder="Phone number..."
+                        type="text"
+                        onFocus={() => setfocusedPhone(true)}
+                        onBlur={() => setfocusedPhone(false)}
                       />
                     </InputGroup>
-                  </FormGroup>
-                  <div className="text-muted font-italic">
-                    <small>
-                      password strength:{" "}
-                      <span className="text-success font-weight-700">
-                        strong
-                      </span>
-                    </small>
-                  </div>
-                  <Row className="my-4">
-                    <Col xs="12">
-                      <div className="custom-control custom-control-alternative custom-checkbox">
-                        <input
-                          className="custom-control-input"
-                          id="customCheckRegister"
-                          type="checkbox"
-                        />
-                        <label
-                          className="custom-control-label"
-                          htmlFor="customCheckRegister"
-                        >
-                          <span className="text-muted">
-                            I agree with the{" "}
-                            <a
-                              href="#pablo"
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              Privacy Policy
-                            </a>
-                          </span>
-                        </label>
-                      </div>
-                    </Col>
-                  </Row>
+                  </FormGroup>                                 
                   <div className="text-center">
-                    <Button className="mt-4" color="info" type="button">
+                    <Button className="mt-4" color="info" type="button" style={{ backgroundColor: "#1B2A72", borderColor: '#21338a' }}>
                       Create account
                     </Button>
                   </div>

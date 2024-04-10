@@ -35,6 +35,7 @@ import {
 } from "reactstrap";
 // core components
 import AuthHeader from "components/Headers/AuthHeader.js";
+import { Alert } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
@@ -42,30 +43,47 @@ function Login() {
   const [focusedPassword, setfocusedPassword] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [loginError, setLoginError] = React.useState('');
   const navigate = useNavigate();
 
   const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjcxNjk2MSwiZXhwIjoxNzEyNzIwNTYxfQ.YFtH3zLl9fmiCHkD_SIcVhiSupC66bqoUS0XDmMXLLs";
-  const handleLogin = () => {    
+  const handleLogin = () => {
     fetch('/api/admin/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`, 
+        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`,
       },
       body: JSON.stringify({ email, password })
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.accessToken) {
-        // Store the accessToken in local storage
-        localStorage.setItem('accessToken', data.accessToken);        
-        navigate("/admin/dashboard");
-      }
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      // Handle error
-    });
+      .then(response => {
+        // Verifica si la respuesta es JSON antes de intentar analizarla
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return response.json();
+        } else {
+          // Si no es JSON, todavía resuelve la promesa para continuar con la secuencia
+          return response.text().then(text => ({ message: text }));
+        }
+      })
+      .then(data => {
+        if (data.accessToken) {
+          // Store the accessToken in local storage
+          localStorage.setItem('accessToken', data.accessToken);
+          navigate("/admin/dashboard");
+        } else {
+          console.log("login unsuccessful");
+          setLoginError('Login unsuccessful. Please try again.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+      });
+  };
+
+  const handleRegister = () => {
+    navigate("/register");
   };
 
   return (
@@ -73,7 +91,7 @@ function Login() {
       <AuthHeader
         title="Welcome!"
         lead=""
-        style={{paddingTop: "50px"}}
+        style={{ paddingTop: "50px" }}
       />
       <Container className="mt--8 pb-5">
         <Row className="justify-content-center">
@@ -88,6 +106,14 @@ function Login() {
                     style={{ maxWidth: '250px' }} // Example size, adjust as needed
                   />
                 </div>
+                {/* Alert error if login is unsuccessful */}
+                {loginError && (
+                  <div className="text-center mb-3">
+                    <Alert color="danger" style={{ backgroundColor: '#a11402', padding: '0.7rem 1rem', borderColor: '#780000' }}>
+                      {loginError}
+                    </Alert>
+                  </div>
+                )}
                 <Form role="form">
                   <FormGroup
                     className={classnames("mb-3", {
@@ -132,19 +158,19 @@ function Login() {
                     </InputGroup>
                   </FormGroup>
                   <div className="text-center">
-                    <Button className="my-4" color="info" type="button" onClick={handleLogin} style={{backgroundColor: "#1B2A72"}}>
+                    <Button className="my-4" color="info" type="button" onClick={handleLogin} style={{ backgroundColor: "#1B2A72", borderColor: '#21338a' }}>
                       Sign in
                     </Button>
                   </div>
                 </Form>
                 <div className="text-center">
-                <a
-                  className="text-light"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <small>Create new account</small>
-                </a>
+                  <a
+                    className="text-light"
+                    href="register"
+                    onClick={(e) => handleRegister()}
+                  >
+                    <small>Create new account</small>
+                  </a>
                 </div>
               </CardBody>
             </Card>
