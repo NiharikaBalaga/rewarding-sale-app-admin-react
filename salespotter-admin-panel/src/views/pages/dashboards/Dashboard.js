@@ -93,72 +93,13 @@ const pagination = paginationFactory({
 const { SearchBar } = Search;
 
 function Dashboard() {
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
+  const TOKEN = localStorage.getItem('accessToken');
+  
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
   const [postsChartData, setPostsChartData] = useState({});
   const [usersChartData, setUsersChartData] = useState({});
-  /* const [postsReportsVotes, setPostsReportsVotes] = useState([]);
-
-  const fetchVoteCounts = async (postId) => {
-    const response = await fetch(`/api/report/${postId}/counts`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`,
-      },
-    });
-    const body = await response.json();
-    return body.postVoteCount; // Assuming this returns the total votes count
-  };
-
-  const fetchReportCounts = async (postId) => {
-    const response = await fetch(`/api/vote/${postId}/votes/count`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${TOKEN}`,
-      },
-    });
-    const body = await response.json();
-    return body.reduce((acc, report) => ({
-      ...acc,
-      ...report,
-    }), {}); // Transform the array of reports into an object
-  };
-
-  const enhancePostsWithVotesAndReports = async (posts) => {
-    const postsWithVotesAndReports = await Promise.all(posts.map(async (post) => {
-      const postVotesCount = await fetchVoteCounts(post._id);
-      console.log("postVotesCount: ", postVotesCount);
-      const {
-        MISLEADING: postMisleadingReportsCount = 0,
-        OUT_OF_STOCK: postOutOfStockReportsCount = 0,
-        NOT_FOUND: postNotFoundReportsCount = 0,
-        CONFIRMATION: postConfirmationReportsCount = 0,
-      } = await fetchReportCounts(post._id);
-
-      return {
-        ...post,
-        postVotesCount,
-        postTotalReportsCount: postMisleadingReportsCount + postOutOfStockReportsCount + postNotFoundReportsCount + postConfirmationReportsCount,
-        postMisleadingReportsCount,
-        postOutOfStockReportsCount,
-        postNotFoundReportsCount,
-        postConfirmationReportsCount,
-      };
-    }));
-
-    setPostsReportsVotes(postsWithVotesAndReports);
-  };
-
-  // Then call this function after loading posts
-  const loadPostsAndEnhance = async () => {
-    const posts = await loadPosts(); // Assuming this function has been adjusted to return the posts
-    const enhancedPosts = await enhancePostsWithVotesAndReports(posts);
-    setPosts(enhancedPosts);
-    console.log("enhancedPosts: ", enhancedPosts);
-  }; */
+  const [postsVotesReportsCount, setpostsVotesReportsCount] = useState([]);
 
   const loadPosts = async () => {
     const response = await fetch('/api/admin/post', {
@@ -171,8 +112,22 @@ function Dashboard() {
     const body = await response.json();
     console.log("body.posts: ", body.posts);
     setPosts(body.posts);
-    aggregatePostsByMonth(body.posts); // Process posts for chart data
-    return body.posts; // Return the posts from the function
+    // Process posts for chart data
+    aggregatePostsByMonth(body.posts);
+
+    return body.posts;
+  };
+
+  const loadPostsVotesReportsCount = async () => {
+    const response = await fetch('/api/admin/post/votes/reports/count', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    });
+    const body = await response.json();
+    setpostsVotesReportsCount(body.posts);
   };
 
   const aggregatePostsByMonth = (posts) => {
@@ -293,6 +248,7 @@ function Dashboard() {
     // Call loadUsers when the component mounts
     //loadUsers();
     loadUsersWithPostCount();
+    loadPostsVotesReportsCount();
   }, []);
 
 
@@ -363,7 +319,79 @@ function Dashboard() {
               </CardBody>
             </Card>
           </Col>
-        </Row>        
+        </Row>
+        <Row>
+          <div className="col">
+            <Card>
+              <CardHeader>
+                <h3 className="mb-0">Posts</h3>
+              </CardHeader>
+              <ToolkitProvider
+                data={postsVotesReportsCount}
+                keyField="_id"
+                columns={[
+                  /* Product name */
+                  {
+                    dataField: "productName",
+                    text: "Product name",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => (
+                      <div>
+                        <img
+                          alt="Product_Image"
+                          className="avatar rounded-circle mr-3"
+                          src={row.productImageObjectUrl} // Use the productImageObjectUrl field for the image source
+                          style={{ width: '55px', height: '55px' }} // Adjust size as needed
+                        />
+                        <b>{cell}</b>
+                      </div>
+                    )
+                  },
+                  /* Votes Count */
+                  {
+                    dataField: "votesCount",
+                    text: "No. Votes",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  /* Report Count */
+                  {
+                    dataField: "reportsCount",
+                    text: "No. Reports",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                ]}
+                search
+              >
+                {(props) => (
+                  <div className="py-4 table-responsive">
+                    <div
+                      id="datatable-basic_filter"
+                      className="dataTables_filter px-4 pb-1"
+                    >
+                      <label>
+                        Search:
+                        <SearchBar
+                          className="form-control-sm"
+                          placeholder=""
+                          {...props.searchProps}
+                        />
+                      </label>
+                    </div>
+                    <BootstrapTable
+                      {...props.baseProps}
+                      bootstrap4={true}
+                      pagination={pagination}
+                      bordered={false}
+                    />
+                  </div>
+                )}
+              </ToolkitProvider>
+            </Card>
+          </div>
+        </Row>
         <Row>
           <div className="col">
             <Card>
@@ -381,7 +409,7 @@ function Dashboard() {
                     sort: true,
                     classes: "vertical-align-middle",
                     formatter: (cell, row, rowIndex) => (
-                      <div>                        
+                      <div>
                         <b>{`${row.firstName} ${row.lastName}`}</b>
                       </div>
                     )
@@ -393,12 +421,18 @@ function Dashboard() {
                     sort: true,
                     classes: "vertical-align-middle",
                   },
-                  /* Phone number */
+                  /* Rewards */
                   {
-                    dataField: "phoneNumber",
-                    text: "No. Rewards",
-                    sort: true,
+                    // dataField is not used since we are hardcoding the value, 
+                    // but you might keep it if it helps identify the column for other purposes
+                    dataField: "phoneNumber", // Optional, since we're not using the field's value
+                    text: "No. rewards",
+                    sort: false, // Sorting might not make sense for a hardcoded value
                     classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => {
+                      // Return the hardcoded value you want to display
+                      return "1"; // This is the hardcoded value
+                    }
                   },
                   /* Status */
                   {

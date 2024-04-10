@@ -65,9 +65,10 @@ const pagination = paginationFactory({
 const { SearchBar } = Search;
 
 function Posts() {
+  const TOKEN = localStorage.getItem('accessToken');
+
   const [alert, setAlert] = React.useState(null);  
-  const navigate = useNavigate();
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTkxNzg0NSwiZXhwIjoxNzEyMDA0MjQ1fQ.bM_d3wTHKaL2iMJmj5V5QePpgcpHW93kerf-WN2wzLw';
+  const navigate = useNavigate();  
   const [posts, setPosts] = useState([]);
   
   const handleEditClick = (post) => {

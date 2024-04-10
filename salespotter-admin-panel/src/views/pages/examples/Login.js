@@ -35,62 +35,59 @@ import {
 } from "reactstrap";
 // core components
 import AuthHeader from "components/Headers/AuthHeader.js";
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [focusedEmail, setfocusedEmail] = React.useState(false);
   const [focusedPassword, setfocusedPassword] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const navigate = useNavigate();
+
+  const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjcxNjk2MSwiZXhwIjoxNzEyNzIwNTYxfQ.YFtH3zLl9fmiCHkD_SIcVhiSupC66bqoUS0XDmMXLLs";
+  const handleLogin = () => {
+    // Replace with your actual login endpoint
+    fetch('/api/admin/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`, // Your super admin token
+      },
+      body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.accessToken) {
+        // Store the accessToken in local storage
+        localStorage.setItem('accessToken', data.accessToken);        
+        navigate("/admin/dashboard");
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      // Handle error
+    });
+  };
+
   return (
     <>
       <AuthHeader
         title="Welcome!"
-        lead="Use these awesome forms to login or create new account in your project for free."
+        lead=""
+        style={{paddingTop: "50px"}}
       />
       <Container className="mt--8 pb-5">
         <Row className="justify-content-center">
           <Col lg="5" md="7">
             <Card className="bg-secondary border-0 mb-0">
-              <CardHeader className="bg-transparent pb-5">
-                <div className="text-muted text-center mt-2 mb-3">
-                  <small>Sign in with</small>
-                </div>
-                <div className="btn-wrapper text-center">
-                  <Button
-                    className="btn-neutral btn-icon"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="btn-inner--icon mr-1">
-                      <img
-                        alt="..."
-                        src={
-                          require("assets/img/icons/common/github.svg").default
-                        }
-                      />
-                    </span>
-                    <span className="btn-inner--text">Github</span>
-                  </Button>
-                  <Button
-                    className="btn-neutral btn-icon"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="btn-inner--icon mr-1">
-                      <img
-                        alt="..."
-                        src={
-                          require("assets/img/icons/common/google.svg").default
-                        }
-                      />
-                    </span>
-                    <span className="btn-inner--text">Google</span>
-                  </Button>
-                </div>
-              </CardHeader>
               <CardBody className="px-lg-5 py-lg-5">
-                <div className="text-center text-muted mb-4">
-                  <small>Or sign in with credentials</small>
+                <div className="text-center mt-2 mb-3">
+                  {/* Display the image directly */}
+                  <img
+                    alt="Descriptive alt text"
+                    src={require("assets/img/brand/salespotteradmin_nobg.png")}
+                    style={{ maxWidth: '250px' }} // Example size, adjust as needed
+                  />
                 </div>
                 <Form role="form">
                   <FormGroup
@@ -109,6 +106,8 @@ function Login() {
                         type="email"
                         onFocus={() => setfocusedEmail(true)}
                         onBlur={() => setfocusedEmail(true)}
+                        value={email} // Use state value
+                        onChange={e => setEmail(e.target.value)} // Update state on change
                       />
                     </InputGroup>
                   </FormGroup>
@@ -128,41 +127,18 @@ function Login() {
                         type="password"
                         onFocus={() => setfocusedPassword(true)}
                         onBlur={() => setfocusedPassword(true)}
+                        value={password} // Use state value
+                        onChange={e => setPassword(e.target.value)} // Update state on change
                       />
                     </InputGroup>
                   </FormGroup>
-                  <div className="custom-control custom-control-alternative custom-checkbox">
-                    <input
-                      className="custom-control-input"
-                      id=" customCheckLogin"
-                      type="checkbox"
-                    />
-                    <label
-                      className="custom-control-label"
-                      htmlFor=" customCheckLogin"
-                    >
-                      <span className="text-muted">Remember me</span>
-                    </label>
-                  </div>
                   <div className="text-center">
-                    <Button className="my-4" color="info" type="button">
+                    <Button className="my-4" color="info" type="button" onClick={handleLogin} style={{backgroundColor: "#1B2A72"}}>
                       Sign in
                     </Button>
                   </div>
                 </Form>
-              </CardBody>
-            </Card>
-            <Row className="mt-3">
-              <Col xs="6">
-                <a
-                  className="text-light"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <small>Forgot password?</small>
-                </a>
-              </Col>
-              <Col className="text-right" xs="6">
+                <div className="text-center">
                 <a
                   className="text-light"
                   href="#pablo"
@@ -170,8 +146,9 @@ function Login() {
                 >
                   <small>Create new account</small>
                 </a>
-              </Col>
-            </Row>
+                </div>
+              </CardBody>
+            </Card>
           </Col>
         </Row>
       </Container>
