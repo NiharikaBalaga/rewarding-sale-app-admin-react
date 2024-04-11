@@ -102,22 +102,4 @@ const routes = [
   },  
 ];
 
-/* // Function to check if user is authenticated
-const isAuthenticated = () => !!localStorage.getItem('accessToken');
-
-// Function that filters routes based on the authentication status
-const getRoutes = () => {
-  if (isAuthenticated()) {
-    // If authenticated, return all routes except the Login route
-    return routes.filter(route => route.name !== "Login");
-  } else {
-    // If not authenticated, only return the Login route
-    return routes.filter(route => route.name === "Login");
-  }
-};
-
-// Export the function for dynamic route filtering
-export default getRoutes; */
-
-
 export default routes;

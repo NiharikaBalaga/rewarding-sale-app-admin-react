@@ -14,7 +14,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 // react plugin that prints a given react component
 import ReactToPrint from "react-to-print";
@@ -38,7 +38,8 @@ import {
 } from "reactstrap";
 // core components
 import SimpleHeader from "components/Headers/SimpleHeader.js";
-
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { dataTable } from "variables/general";
 
 
@@ -73,156 +74,184 @@ const pagination = paginationFactory({
 const { SearchBar } = Search;
 
 function Rewards() {
+  const TOKEN = localStorage.getItem('accessToken');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [usersPoints, setUsersPoints] = useState([]);
+  const [userPostsPoints, setUserPostsPoints] = useState([]);
+  const [showUsersPoints, setShowUsersPoints] = useState(true);
   const [alert, setAlert] = React.useState(null);
-  const componentRef = React.useRef(null);
-  // this function will copy to clipboard an entire table,
-  // so you can paste it inside an excel or csv file
-  const copyToClipboardAsTable = (el) => {
-    var body = document.body,
-      range,
-      sel;
-    if (document.createRange && window.getSelection) {
-      range = document.createRange();
-      sel = window.getSelection();
-      sel.removeAllRanges();
-      try {
-        range.selectNodeContents(el);
-        sel.addRange(range);
-      } catch (e) {
-        range.selectNode(el);
-        sel.addRange(range);
+
+  const loadDataUsersPoints = () => {
+    fetch('/api/admin/users', {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
       }
-      document.execCommand("copy");
-    } else if (body.createTextRange) {
-      range = body.createTextRange();
-      range.moveToElementText(el);
-      range.select();
-      range.execCommand("Copy");
-    }
-    setAlert(
-      <ReactBSAlert
-        success
-        style={{ display: "block", marginTop: "-100px" }}
-        title="Good job!"
-        onConfirm={() => setAlert(null)}
-        onCancel={() => setAlert(null)}
-        confirmBtnBsStyle="info"
-        btnSize=""
-      >
-        Copied to clipboard!
-      </ReactBSAlert>
-    );
+    }).then(res => res.json())
+      .then(body => {
+        console.log("body: ", body);
+        console.log("body.users: ", body.users);
+        setUsersPoints(body.users);
+        setShowUsersPoints(true);
+      });
+  }
+
+  const loadDataUserPostsPoints = (userId) => {
+    fetch(`/api/admin/user/${userId}/posts/points`, {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${TOKEN}`,
+      },
+    }).then(res => res.json())
+      .then(body => {
+        console.log("loadDataUserPostsPoints body: ", body);
+        console.log("body.userPostsPoints: ", body.userPostsPoints);
+        setUserPostsPoints(body.userPostsPoints);
+        setShowUsersPoints(false);
+      });
+  }
+
+  const handleEditClick = (reward) => {
+    console.log("handleEditClick reward: ", reward)
+    navigate("/admin/rewards-edit", { state: { reward } });
   };
+
+  useEffect(() => {
+    console.log("location.state: ", location.state);
+    if(!location.state){
+      loadDataUsersPoints();
+    } else {
+      loadDataUserPostsPoints(location.state.userId)
+    }    
+  }, []);
 
   return (
     <>
-    {alert}
-    <SimpleHeader name="Rewards" parentName="Rewards" />
-    <Container className="mt--6" fluid>
+      {alert}
+      <SimpleHeader name="Rewards" parentName="" />
+      <Container className="mt--6" fluid>
         <Row>
-            <div className="col">
-                <Card>
-                    <CardHeader>
-                        <h3 className="mb-0">Rewards</h3>
-                    </CardHeader>
-                    <ToolkitProvider
-                        data={dataTable}
-                        keyField="name"
-                        columns={[
-                            /* Name */
-                            {
-                                dataField: "name",
-                                text: "Name",
-                                sort: true,
-                                formatter: (cell, row, rowIndex) => (
-                                    <div>
-                                        {rowIndex % 2 === 0 ? (
-                                            <img
-                                            alt="..."
-                                            className="avatar rounded-circle mr-3"
-                                            src={require("assets/img/theme/team-1.jpg")}
-                                            />
-                                        ) : (
-                                            <img
-                                            alt="..."
-                                            className="avatar rounded-circle mr-3"
-                                            src={require("assets/img/theme/team-2.jpg")}
-                                            />
-                                        )}
-                                        <b>{cell}</b>
-                                    </div>
-                                )
-                            },                            
-                            /* Rewards */                           
-                            {
-                              dataField: "age",
-                              text: "Rewards",
-                              sort: true,
-                            },                            
-                            /* Actions */
-                            {
-                                dataField: null,
-                                text: "Actions",
-                                formatter: (cell, row) => (
-                                    <div>
-                                    {/* Edit reward icon */}                                    
-                                    <NavLink
-                                        to="/admin/rewards-edit"
-                                        className="table-action"
-                                        id="tooltip564981685"                                        
-                                    >
-                                        <i className="fas fa-edit" />
-                                    </NavLink>
-                                    <UncontrolledTooltip delay={0} target="tooltip564981685">
-                                        Edit reward
-                                    </UncontrolledTooltip>                                    
-                                    {/* Delete reward icon */}
-                                    <a
-                                    className="table-action table-action-delete"
-                                    href="#pablo"
-                                    id="tooltip601065234"
-                                    onClick={(e) => e.preventDefault()}
-                                    >
-                                        <i className="fas fa-trash" />
-                                    </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065234">
-                                        Delete reward
-                                    </UncontrolledTooltip>
-                                    </div>
-                                )
-                            }
-                        ]}
-                        search
-                    >
-                    {(props) => (
-                        <div className="py-4 table-responsive">
-                        <div
-                            id="datatable-basic_filter"
-                            className="dataTables_filter px-4 pb-1"
-                        >
-                            <label>
-                            Search:
-                            <SearchBar
-                                className="form-control-sm"
-                                placeholder=""
-                                {...props.searchProps}
-                            />
-                            </label>
-                        </div>
-                        <BootstrapTable
-                            {...props.baseProps}
-                            bootstrap4={true}
-                            pagination={pagination}
-                            bordered={false}
+          <div className="col">
+            <Card>
+              <ToolkitProvider
+                data={showUsersPoints ? usersPoints : userPostsPoints}
+                keyField="_id"
+                columns={[
+                  {
+                    dataField: "name",
+                    text: "Name",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => (
+                      <div>
+                        <b>{`${row.firstName} ${row.lastName}`}</b>
+                      </div>
+                    )
+                  },
+                  ...!showUsersPoints ? [{
+                    dataField: "productName",
+                    text: "Product name",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row, rowIndex) => (
+                      <div>
+                        <img
+                          alt="Product_Image"
+                          className="avatar rounded-circle mr-3"
+                          src={row.productImageObjectUrl} // Use the productImageObjectUrl field for the image source
+                          style={{ width: '55px', height: '55px' }} // Adjust size as needed
                         />
-                        </div>
-                    )}
-                    </ToolkitProvider>
-                </Card>            
-            </div>
+                        <b>{cell}</b>
+                      </div>
+                    )
+                  }] : [],
+                  {
+                    dataField: showUsersPoints ? "points" : "post_points",
+                    text: "Points",
+                    sort: true,
+                    classes: "vertical-align-middle",
+                  },
+                  ...!showUsersPoints ? [{
+                    dataField: "actions",
+                    text: "Actions",
+                    classes: "vertical-align-middle",
+                    formatter: (cell, row) => (
+                      <div>
+                        <a
+                          className="table-action"
+                          href="#edit"
+                          id={`tooltip-edit-${row._id}`}
+                          onClick={(e) => {
+                            e.preventDefault();                            
+                            handleEditClick(row);
+                          }}
+                        >
+                          <i className="fas fa-edit" />
+                        </a>
+                        <UncontrolledTooltip delay={0} target={`tooltip-edit-${row._id}`}>
+                          Edit reward
+                        </UncontrolledTooltip>                        
+                      </div>
+                    ),
+                    sort: false
+                  },] : [],
+                  {
+                    dataField: "toggleView",
+                    text: "Change View",
+                    formatter: (cellContent, row) => {
+                      return (
+                        <a
+                          href="#!"
+                          className="text-primary font-weight-bold"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            showUsersPoints ? loadDataUserPostsPoints(row._id) : loadDataUsersPoints();
+                          }}
+                          style={{ cursor: 'pointer', fontStyle: 'italic' }}
+                        >
+                          {showUsersPoints ? "View Posts Points" : "View Users Points"}
+                        </a>
+                      );
+                    },
+                    sort: false,
+                    classes: "vertical-align-middle",
+                  },
+                ]}
+                search
+              >
+                {(props) => (
+                  <div className="py-4 table-responsive">
+                    <div
+                      id="datatable-basic_filter"
+                      className="dataTables_filter px-4 pb-1"
+                    >
+                      <label>
+                        Search:
+                        <SearchBar
+                          className="form-control-sm"
+                          placeholder=""
+                          {...props.searchProps}
+                        />
+                      </label>
+                    </div>
+                    <BootstrapTable
+                      {...props.baseProps}
+                      bootstrap4={true}
+                      pagination={pagination}
+                      bordered={false}
+                    />
+                  </div>
+                )}
+              </ToolkitProvider>
+            </Card>
+          </div>
         </Row>
-    </Container>
+      </Container>
     </>
+
   );
 }
 

@@ -39,15 +39,27 @@ import { Alert } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
+  const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjE2ZmRlYTAxNDVkMDc4MjRlYThiNzIiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjc4MjgyNiwiZXhwIjoxNzEyNzg2NDI2fQ.3U8iIavlj9d9vMo6-QjyidfsRODEgx7qwxucFA8xLIg";
+  const navigate = useNavigate();
+  // focused states
   const [focusedEmail, setfocusedEmail] = React.useState(false);
   const [focusedPassword, setfocusedPassword] = React.useState(false);
+  // Input field states
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  // Error states
   const [loginError, setLoginError] = React.useState('');
-  const navigate = useNavigate();
+  const [emailError, setEmailError] = React.useState('');
+  const [passwordError, setPasswordError] = React.useState('');
 
-  const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWZiNWM5MWEyYTg2OTcxMDNjMzYzMGMiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjcxNjk2MSwiZXhwIjoxNzEyNzIwNTYxfQ.YFtH3zLl9fmiCHkD_SIcVhiSupC66bqoUS0XDmMXLLs";
   const handleLogin = () => {
+    // Validate the form fields
+    let isValid = validationFormFields();
+    if (!isValid) {
+      return;
+    }
+
+    // Consume the login service
     fetch('/api/admin/login', {
       method: 'POST',
       headers: {
@@ -57,12 +69,12 @@ function Login() {
       body: JSON.stringify({ email, password })
     })
       .then(response => {
-        // Verifica si la respuesta es JSON antes de intentar analizarla
+        // Checks if the answer is JSON before trying to analyze it
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
           return response.json();
         } else {
-          // Si no es JSON, todavía resuelve la promesa para continuar con la secuencia
+          // If it's not JSON, it resolves the promise to continue with the secuence
           return response.text().then(text => ({ message: text }));
         }
       })
@@ -82,8 +94,40 @@ function Login() {
       });
   };
 
-  const handleRegister = () => {
-    navigate("/register");
+  const handleRegister = (e) => {
+    e.preventDefault();
+    navigate("/register", { state: { superAdminToken: SUPER_ADMIN_TOKEN } });
+  };
+
+  // Validation functions
+  const validationFormFields = () => {
+    let isValid = true;
+
+    // Reset error messages
+    setEmailError('');
+    setPasswordError('');
+
+    // Validate email
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError('Invalid email address');
+      isValid = false;
+    }
+
+    // Validate password
+    if (!password.trim()) {
+      setPasswordError('Password is required');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(String(email).toLowerCase());
   };
 
   return (
@@ -98,12 +142,12 @@ function Login() {
           <Col lg="5" md="7">
             <Card className="bg-secondary border-0 mb-0">
               <CardBody className="px-lg-5 py-lg-5">
-                <div className="text-center mt-2 mb-3">
-                  {/* Display the image directly */}
+                <div className="text-center mb-3">
+                  {/* Salespotter image */}
                   <img
                     alt="Descriptive alt text"
                     src={require("assets/img/brand/salespotteradmin_nobg.png")}
-                    style={{ maxWidth: '250px' }} // Example size, adjust as needed
+                    style={{ maxWidth: '250px' }}
                   />
                 </div>
                 {/* Alert error if login is unsuccessful */}
@@ -115,10 +159,12 @@ function Login() {
                   </div>
                 )}
                 <Form role="form">
+                  {/* Email */}
                   <FormGroup
                     className={classnames("mb-3", {
                       focused: focusedEmail,
                     })}
+                    style={{ marginBottom: emailError ? '8px' : undefined }}
                   >
                     <InputGroup className="input-group-merge input-group-alternative">
                       <InputGroupAddon addonType="prepend">
@@ -129,17 +175,21 @@ function Login() {
                       <Input
                         placeholder="Email"
                         type="email"
+                        name="email_login"
                         onFocus={() => setfocusedEmail(true)}
                         onBlur={() => setfocusedEmail(true)}
-                        value={email} // Use state value
-                        onChange={e => setEmail(e.target.value)} // Update state on change
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                       />
                     </InputGroup>
+                    {emailError && <span style={{ color: 'red', fontSize: '0.8rem' }}>{emailError}</span>}
                   </FormGroup>
+                  {/* Password */}
                   <FormGroup
                     className={classnames({
                       focused: focusedPassword,
                     })}
+                    style={{ marginBottom: passwordError ? '8px' : undefined }}
                   >
                     <InputGroup className="input-group-merge input-group-alternative">
                       <InputGroupAddon addonType="prepend">
@@ -150,26 +200,29 @@ function Login() {
                       <Input
                         placeholder="Password"
                         type="password"
+                        name="password_login"
                         onFocus={() => setfocusedPassword(true)}
                         onBlur={() => setfocusedPassword(true)}
-                        value={password} // Use state value
-                        onChange={e => setPassword(e.target.value)} // Update state on change
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
                       />
                     </InputGroup>
+                    {passwordError && <span style={{ color: 'red', fontSize: '0.8rem' }}>{passwordError}</span>}
                   </FormGroup>
-                  <div className="text-center">
-                    <Button className="my-4" color="info" type="button" onClick={handleLogin} style={{ backgroundColor: "#1B2A72", borderColor: '#21338a' }}>
-                      Sign in
+                  <div className="text-center mb-2">
+                    <Button className="mt-4" color="info" type="button" onClick={handleLogin} style={{ backgroundColor: "#1B2A72", borderColor: '#21338a' }}>
+                      Log in
                     </Button>
                   </div>
                 </Form>
                 <div className="text-center">
                   <a
-                    className="text-light"
-                    href="register"
-                    onClick={(e) => handleRegister()}
+                    className="text-light"         
+                    href="#"           
+                    onClick={(e) => handleRegister(e)}
+                    style={{ cursor: 'pointer' }}
                   >
-                    <small>Create new account</small>
+                    <small>Register a new admin</small>
                   </a>
                 </div>
               </CardBody>

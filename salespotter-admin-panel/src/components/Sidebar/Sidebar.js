@@ -274,7 +274,7 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
             </NavItem>
             <NavItem>
               <NavLink href="#" onClick={handleLogout}>
-                <i className="ni ni-user-run text-primary" />
+                <i className="fas fa-sign-out-alt text-primary" />
                 <span className="nav-link-text">Logout</span>
               </NavLink>
             </NavItem>
