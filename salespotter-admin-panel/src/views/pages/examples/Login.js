@@ -35,68 +35,136 @@ import {
 } from "reactstrap";
 // core components
 import AuthHeader from "components/Headers/AuthHeader.js";
+import { Alert } from 'reactstrap';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
+  const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjE2ZmRlYTAxNDVkMDc4MjRlYThiNzIiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjc4MjgyNiwiZXhwIjoxNzEyNzg2NDI2fQ.3U8iIavlj9d9vMo6-QjyidfsRODEgx7qwxucFA8xLIg";
+  const navigate = useNavigate();
+  // focused states
   const [focusedEmail, setfocusedEmail] = React.useState(false);
   const [focusedPassword, setfocusedPassword] = React.useState(false);
+  // Input field states
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  // Error states
+  const [loginError, setLoginError] = React.useState('');
+  const [emailError, setEmailError] = React.useState('');
+  const [passwordError, setPasswordError] = React.useState('');
+
+  const handleLogin = () => {
+    // Validate the form fields
+    let isValid = validationFormFields();
+    if (!isValid) {
+      return;
+    }
+
+    // Consume the login service
+    fetch('/api/admin/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`,
+      },
+      body: JSON.stringify({ email, password })
+    })
+      .then(response => {
+        // Checks if the answer is JSON before trying to analyze it
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          return response.json();
+        } else {
+          // If it's not JSON, it resolves the promise to continue with the secuence
+          return response.text().then(text => ({ message: text }));
+        }
+      })
+      .then(data => {
+        if (data.accessToken) {
+          // Store the accessToken in local storage
+          localStorage.setItem('accessToken', data.accessToken);
+          navigate("/admin/dashboard");
+        } else {
+          console.log("login unsuccessful");
+          setLoginError('Login unsuccessful. Please try again.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+      });
+  };
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    navigate("/register", { state: { superAdminToken: SUPER_ADMIN_TOKEN } });
+  };
+
+  // Validation functions
+  const validationFormFields = () => {
+    let isValid = true;
+
+    // Reset error messages
+    setEmailError('');
+    setPasswordError('');
+
+    // Validate email
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError('Invalid email address');
+      isValid = false;
+    }
+
+    // Validate password
+    if (!password.trim()) {
+      setPasswordError('Password is required');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(String(email).toLowerCase());
+  };
+
   return (
     <>
       <AuthHeader
         title="Welcome!"
-        lead="Use these awesome forms to login or create new account in your project for free."
+        lead=""
+        style={{ paddingTop: "50px" }}
       />
       <Container className="mt--8 pb-5">
         <Row className="justify-content-center">
           <Col lg="5" md="7">
             <Card className="bg-secondary border-0 mb-0">
-              <CardHeader className="bg-transparent pb-5">
-                <div className="text-muted text-center mt-2 mb-3">
-                  <small>Sign in with</small>
-                </div>
-                <div className="btn-wrapper text-center">
-                  <Button
-                    className="btn-neutral btn-icon"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="btn-inner--icon mr-1">
-                      <img
-                        alt="..."
-                        src={
-                          require("assets/img/icons/common/github.svg").default
-                        }
-                      />
-                    </span>
-                    <span className="btn-inner--text">Github</span>
-                  </Button>
-                  <Button
-                    className="btn-neutral btn-icon"
-                    color="default"
-                    href="#pablo"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <span className="btn-inner--icon mr-1">
-                      <img
-                        alt="..."
-                        src={
-                          require("assets/img/icons/common/google.svg").default
-                        }
-                      />
-                    </span>
-                    <span className="btn-inner--text">Google</span>
-                  </Button>
-                </div>
-              </CardHeader>
               <CardBody className="px-lg-5 py-lg-5">
-                <div className="text-center text-muted mb-4">
-                  <small>Or sign in with credentials</small>
+                <div className="text-center mb-3">
+                  {/* Salespotter image */}
+                  <img
+                    alt="Descriptive alt text"
+                    src={require("assets/img/brand/salespotteradmin_nobg.png")}
+                    style={{ maxWidth: '250px' }}
+                  />
                 </div>
+                {/* Alert error if login is unsuccessful */}
+                {loginError && (
+                  <div className="text-center mb-3">
+                    <Alert color="danger" style={{ backgroundColor: '#a11402', padding: '0.7rem 1rem', borderColor: '#780000' }}>
+                      {loginError}
+                    </Alert>
+                  </div>
+                )}
                 <Form role="form">
+                  {/* Email */}
                   <FormGroup
                     className={classnames("mb-3", {
                       focused: focusedEmail,
                     })}
+                    style={{ marginBottom: emailError ? '8px' : undefined }}
                   >
                     <InputGroup className="input-group-merge input-group-alternative">
                       <InputGroupAddon addonType="prepend">
@@ -107,15 +175,21 @@ function Login() {
                       <Input
                         placeholder="Email"
                         type="email"
+                        name="email_login"
                         onFocus={() => setfocusedEmail(true)}
                         onBlur={() => setfocusedEmail(true)}
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                       />
                     </InputGroup>
+                    {emailError && <span style={{ color: 'red', fontSize: '0.8rem' }}>{emailError}</span>}
                   </FormGroup>
+                  {/* Password */}
                   <FormGroup
                     className={classnames({
                       focused: focusedPassword,
                     })}
+                    style={{ marginBottom: passwordError ? '8px' : undefined }}
                   >
                     <InputGroup className="input-group-merge input-group-alternative">
                       <InputGroupAddon addonType="prepend">
@@ -126,52 +200,33 @@ function Login() {
                       <Input
                         placeholder="Password"
                         type="password"
+                        name="password_login"
                         onFocus={() => setfocusedPassword(true)}
                         onBlur={() => setfocusedPassword(true)}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
                       />
                     </InputGroup>
+                    {passwordError && <span style={{ color: 'red', fontSize: '0.8rem' }}>{passwordError}</span>}
                   </FormGroup>
-                  <div className="custom-control custom-control-alternative custom-checkbox">
-                    <input
-                      className="custom-control-input"
-                      id=" customCheckLogin"
-                      type="checkbox"
-                    />
-                    <label
-                      className="custom-control-label"
-                      htmlFor=" customCheckLogin"
-                    >
-                      <span className="text-muted">Remember me</span>
-                    </label>
-                  </div>
-                  <div className="text-center">
-                    <Button className="my-4" color="info" type="button">
-                      Sign in
+                  <div className="text-center mb-2">
+                    <Button className="mt-4" color="info" type="button" onClick={handleLogin} style={{ backgroundColor: "#1B2A72", borderColor: '#21338a' }}>
+                      Log in
                     </Button>
                   </div>
                 </Form>
+                <div className="text-center">
+                  <a
+                    className="text-light"         
+                    href="#"           
+                    onClick={(e) => handleRegister(e)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <small>Register a new admin</small>
+                  </a>
+                </div>
               </CardBody>
             </Card>
-            <Row className="mt-3">
-              <Col xs="6">
-                <a
-                  className="text-light"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <small>Forgot password?</small>
-                </a>
-              </Col>
-              <Col className="text-right" xs="6">
-                <a
-                  className="text-light"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <small>Create new account</small>
-                </a>
-              </Col>
-            </Row>
           </Col>
         </Row>
       </Container>

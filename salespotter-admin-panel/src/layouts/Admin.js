@@ -23,6 +23,7 @@ import AdminFooter from "components/Footers/AdminFooter.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 
 import routes from "routes.js";
+import ProtectedRoute from "ProtectedRoute";
 
 function Admin() {
   const [sidenavOpen, setSidenavOpen] = React.useState(true);
@@ -92,12 +93,18 @@ function Admin() {
           brandText={getBrandText(location.pathname)}
         />
         <Routes>
-          {getRoutes(routes)}
-          <Route
-            path="*"
-            element={<Navigate to="/admin/dashboard" replace />}
-          />
-        </Routes>
+  {routes.map((route, index) => (
+    <Route
+      key={index}
+      path={route.path}
+      element={
+        <ProtectedRoute>
+          {route.component}
+        </ProtectedRoute>
+      }
+    />
+  ))}
+</Routes>
         <AdminFooter />
       </div>
       {sidenavOpen ? (

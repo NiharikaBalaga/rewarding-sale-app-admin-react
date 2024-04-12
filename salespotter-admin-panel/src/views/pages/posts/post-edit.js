@@ -34,9 +34,10 @@ import {
 import SimpleHeader from "components/Headers/SimpleHeader.js";
 
 function PostEdit() {
+  const TOKEN = localStorage.getItem('accessToken');
+  
   const location = useLocation();
-  const navigate = useNavigate();
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjAzOWM1OTNjNDgxMGM1MjhkNWM2YjciLCJwaG9uZU51bWJlciI6IjIyNi04ODMtMTg0NiIsImlhdCI6MTcxMTU3MzkyOCwiZXhwIjoxNzExNjYwMzI4fQ.kJ2JPLbn9xc2JD7X1FuAu48Ycv_rRRQNFzD6xXMYApk';  
+  const navigate = useNavigate();    
 
   useEffect(() => {
     // If statement that checks if the location has the props with the post values
