@@ -38,7 +38,7 @@ import AuthHeader from "components/Headers/AuthHeader.js";
 import { Alert } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function LoginSuperAdmin() {
   const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjE3NjQ5MGQyODk0ZDMyOGY0MDk3OTgiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjk2MDE2NSwiZXhwIjoxNzEyOTYzNzY1fQ.7AJc_t-4VskzNqW1whBocs1di-6OAnwK747wTFwhoyI";
   const navigate = useNavigate();
   // focused states
@@ -66,7 +66,7 @@ function Login() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`,
       },
-      body: JSON.stringify({ email, password, superAdmin: false })
+      body: JSON.stringify({ email, password, superAdmin: true })
     })
       .then(response => {
         // Checks if the answer is JSON before trying to analyze it
@@ -95,9 +95,9 @@ function Login() {
       });
   };
 
-  const handleSuperAdminLogin = (e) => {
+  const handleRegister = (e) => {
     e.preventDefault();
-    navigate("/login-super-admin");
+    navigate("/register", { state: { superAdminToken: SUPER_ADMIN_TOKEN } });
   };
 
   // Validation functions
@@ -176,7 +176,7 @@ function Login() {
                       <Input
                         placeholder="Email"
                         type="email"
-                        name="email_admin_login"
+                        name="email_super_admin_login"
                         onFocus={() => setfocusedEmail(true)}
                         onBlur={() => setfocusedEmail(true)}
                         value={email}
@@ -201,7 +201,7 @@ function Login() {
                       <Input
                         placeholder="Password"
                         type="password"
-                        name="password_admin_login"
+                        name="password_super_admin_login"
                         onFocus={() => setfocusedPassword(true)}
                         onBlur={() => setfocusedPassword(true)}
                         value={password}
@@ -220,10 +220,10 @@ function Login() {
                   <a
                     className="text-light"         
                     href="#"           
-                    onClick={(e) => handleSuperAdminLogin(e)}
+                    onClick={(e) => handleRegister(e)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <small>Not an admin? Go to the Super Admin Login</small>
+                    <small>Register a new admin</small>
                   </a>
                 </div>
               </CardBody>
@@ -235,4 +235,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default LoginSuperAdmin;

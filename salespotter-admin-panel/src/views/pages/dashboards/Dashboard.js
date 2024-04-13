@@ -119,6 +119,7 @@ function Dashboard() {
   };
 
   const loadPostsVotesReportsCount = async () => {
+    console.log("loadPostsVotesReportsCount: ", TOKEN);
     const response = await fetch('/api/admin/post/votes/reports/count', {
       method: 'GET',
       headers: {
@@ -324,7 +325,7 @@ function Dashboard() {
           <div className="col">
             <Card>
               <CardHeader>
-                <h3 className="mb-0">Posts</h3>
+                <h3 className="mb-0">Post Metrics</h3>
               </CardHeader>
               <ToolkitProvider
                 data={postsVotesReportsCount}
@@ -396,7 +397,7 @@ function Dashboard() {
           <div className="col">
             <Card>
               <CardHeader>
-                <h3 className="mb-0">Users</h3>
+                <h3 className="mb-0">User Activity Summary</h3>
               </CardHeader>
               <ToolkitProvider
                 data={users}

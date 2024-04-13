@@ -36,6 +36,7 @@ import "assets/css/style.css";
 import AdminLayout from "layouts/Admin.js";
 import Login from "views/pages/examples/Login";
 import Register from "views/pages/examples/Register";
+import LoginSuperAdmin from "views/pages/examples/LoginSuperAdmin";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -43,7 +44,8 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/admin/*" element={<AdminLayout />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/login-admin" element={<Login />} />
+      <Route path="/login-super-admin" element={<LoginSuperAdmin />} />
       <Route path="/register" element={<Register />} />
       <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
     </Routes>
