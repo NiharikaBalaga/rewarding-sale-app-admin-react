@@ -63,8 +63,7 @@ function LoginSuperAdmin() {
     fetch('/api/admin/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ email, password, superAdmin: true })
     })
@@ -83,6 +82,7 @@ function LoginSuperAdmin() {
           // Store the accessToken in local storage
           localStorage.setItem('accessToken', data.accessToken);
           localStorage.setItem('fullName', data.fullName);
+          localStorage.setItem('superAdmin', data.superAdmin);
           navigate("/admin/dashboard");
         } else {
           console.log("login unsuccessful");
@@ -95,9 +95,9 @@ function LoginSuperAdmin() {
       });
   };
 
-  const handleRegister = (e) => {
+  const handleAdminLogin = (e) => {
     e.preventDefault();
-    navigate("/register", { state: { superAdminToken: SUPER_ADMIN_TOKEN } });
+    navigate("/login-admin", { state: { superAdminToken: SUPER_ADMIN_TOKEN } });
   };
 
   // Validation functions
@@ -135,7 +135,7 @@ function LoginSuperAdmin() {
     <>
       <AuthHeader
         title="Welcome!"
-        lead=""
+        lead="Login as an Super Admin"
         style={{ paddingTop: "50px" }}
       />
       <Container className="mt--8 pb-5">
@@ -220,10 +220,10 @@ function LoginSuperAdmin() {
                   <a
                     className="text-light"         
                     href="#"           
-                    onClick={(e) => handleRegister(e)}
+                    onClick={(e) => handleAdminLogin(e)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <small>Register a new admin</small>
+                    <small>Not a super admin? Go to the Admin Login</small>
                   </a>
                 </div>
               </CardBody>

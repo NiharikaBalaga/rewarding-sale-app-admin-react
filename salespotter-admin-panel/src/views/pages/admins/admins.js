@@ -65,10 +65,12 @@ const pagination = paginationFactory({
 const { SearchBar } = Search;
 
 function Admins() {
+  const TOKEN = localStorage.getItem('accessToken');
+  
   const [alert, setAlert] = React.useState(null);
   const navigate = useNavigate();
-  const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjE3NjQ5MGQyODk0ZDMyOGY0MDk3OTgiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjk2MDE2NSwiZXhwIjoxNzEyOTYzNzY1fQ.7AJc_t-4VskzNqW1whBocs1di-6OAnwK747wTFwhoyI';
-  const [admins, setAdmins] = useState([]); // Initial empty array of users  
+  const [admins, setAdmins] = useState([]);
+  const [adminBlocked, setAdminBlocked] = useState([]);
 
   const loadData = () => {
     fetch('/api/admin', {
@@ -95,7 +97,7 @@ function Admins() {
     navigate("/admin/admin-edit", { state: { admin: admin, token: TOKEN } });
   };
 
-  const blockAdmin = (adminId) => {
+  const blockAdmin = (adminId, isBlocked) => {
     console.log("adminId: ", adminId);
     fetch('/api/admin/block', {
       method: 'PUT',
@@ -103,7 +105,7 @@ function Admins() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${TOKEN}`,
       },
-      body: JSON.stringify({ adminId: adminId })
+      body: JSON.stringify({ adminId, blockAdmin: !isBlocked })
     })
     .then(response => response.json())
     .then(data => {
@@ -157,7 +159,8 @@ function Admins() {
                     dataField: "name",
                     text: "Name",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row, rowIndex) => (
                       <div>                        
                         <b>{`${row.firstName} ${row.lastName}`}</b>
@@ -169,22 +172,24 @@ function Admins() {
                     dataField: "email",
                     text: "Email address",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   /* Phone number */
                   {
                     dataField: "phoneNumber",
                     text: "Phone number",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   /* Created at */
                   {
                     dataField: "createdAt",
                     text: "Created at",
-                    sort: true,
-                    classes: "vertical-align-middle",
-                    classes: "vertical-align-middle",
+                    sort: true,                    
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => {
                       const dateObj = new Date(cell);
                       // Converts to YYYY-MM-DD format
@@ -197,7 +202,8 @@ function Admins() {
                     dataField: "status",
                     text: "Status",                              
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => {
                       // Determine the badge class based on the signedUp field's value
                       const badgeClass = !row.isBlocked ? "bg-success" : "bg-danger";
@@ -219,7 +225,8 @@ function Admins() {
                   {
                     dataField: "actions",
                     text: "Actions",
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => (
                       <div>
                         {/* Edit admin icon */}
@@ -237,20 +244,20 @@ function Admins() {
                         <UncontrolledTooltip delay={0} target="tooltip564981685">
                           Edit admin
                         </UncontrolledTooltip>
-                        {/* Block admin icon */}
+                        {/* Block/Unblock admin icon */}
                         <a
                           className="table-action table-action-delete"
                           href="#pablo"
-                          id="tooltip601065235"
+                          id={`block-tooltip-${row._id}`}
                           onClick={(e) => {
                             e.preventDefault();
-                            blockAdmin(row._id);
+                            blockAdmin(row._id, row.isBlocked);
                           }}
                         >
-                          <i className="fas fa-ban" />
+                          <i className={row.isBlocked ? "fas fa-unlock" : "fas fa-ban"} />
                         </a>
-                        <UncontrolledTooltip delay={0} target="tooltip601065235">
-                          Block admin
+                        <UncontrolledTooltip delay={0} target={`block-tooltip-${row._id}`}>
+                          {row.isBlocked ? "Unblock admin" : "Block admin"}
                         </UncontrolledTooltip>
                         {/* Delete admin icon */}
                         <a

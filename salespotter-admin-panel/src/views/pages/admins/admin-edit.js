@@ -35,9 +35,10 @@ import {
 import SimpleHeader from "components/Headers/SimpleHeader.js";
 
 function AdminEdit() {
+    const TOKEN = localStorage.getItem('accessToken');
+    
     const location = useLocation();
-    const navigate = useNavigate();
-    const TOKEN = location.state.token;
+    const navigate = useNavigate();    
 
     useEffect(() => {
         console.log("location: ", location);

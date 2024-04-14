@@ -97,7 +97,7 @@ function Posts() {
     loadData();
   }, []);
 
-  const blockPost = (postId) => {
+  const blockPost = (postId, isActive) => {
     console.log("userId: ", postId);
     fetch('/api/admin/post/block', {
       method: 'PUT',
@@ -105,7 +105,7 @@ function Posts() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${TOKEN}`,
       },
-      body: JSON.stringify({ postId: postId })
+      body: JSON.stringify({ postId, blockPost: isActive })
     })
       .then(response => response.json())
       .then(data => {
@@ -138,7 +138,8 @@ function Posts() {
                     dataField: "productName",
                     text: "Product name",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row, rowIndex) => (
                       <div>
                         <img
@@ -156,35 +157,40 @@ function Posts() {
                     dataField: "oldPrice",
                     text: "Old price",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   /* Old quantity */
                   {
                     dataField: "oldQuantity",
                     text: "Old quantity",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   /* New price */
                   {
                     dataField: "newPrice",
                     text: "New price",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   /* New quantity */
                   {
                     dataField: "newQuantity",
                     text: "New quantity",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   /* Created at */
                   {
                     dataField: "createdAt",
                     text: "Created at",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => {
                       const dateObj = new Date(cell);
                       // Converts to YYYY-MM-DD format
@@ -197,7 +203,8 @@ function Posts() {
                     dataField: "status",
                     text: "Status",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => {
                       let badgeClass, statusText;
 
@@ -237,7 +244,8 @@ function Posts() {
                   {
                     dataField: "actions",
                     text: "Actions",
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => (
                       <div>
                         {/* Edit post icon */}
@@ -259,16 +267,16 @@ function Posts() {
                         <a
                           className="table-action table-action-delete"
                           href="#pablo"
-                          id="tooltip601065234"
+                          id={`block-tooltip-${row._id}`}
                           onClick={(e) => {
                             e.preventDefault();
-                            blockPost(row._id);
+                            blockPost(row._id, row.isActive);
                           }}
                         >
-                          <i className="fas fa-ban" />
+                          <i className={!row.isActive ? "fas fa-unlock" : "fas fa-ban"} />
                         </a>
-                        <UncontrolledTooltip delay={0} target="tooltip601065234">
-                          Block post
+                        <UncontrolledTooltip delay={0} target={`block-tooltip-${row._id}`}>
+                        {!row.isActive ? "Unblock post" : "Block post"}
                         </UncontrolledTooltip>
                       </div>
                     )

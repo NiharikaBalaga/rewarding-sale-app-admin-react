@@ -37,12 +37,14 @@ import {
 import { Alert } from 'reactstrap';
 import { useLocation } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-import AuthHeader from "components/Headers/AuthHeader.js";
+//import AuthHeader from "components/Headers/AuthHeader.js";
+import SimpleHeader from "components/Headers/SimpleHeader.js";
 
 function Register() {
+  const TOKEN = localStorage.getItem('accessToken');
+
   const location = useLocation();
   const navigate = useNavigate();
-  const SUPER_ADMIN_TOKEN = location.state.superAdminToken;
   // focused states
   const [focusedFirstName, setfocusedFirstName] = React.useState(false);
   const [focusedLastName, setfocusedLastName] = React.useState(false);
@@ -70,29 +72,45 @@ function Register() {
 
   const handleCreate = () => {
     // Validate the form fields
-    let isValid = validationFormFieldsCreation();    
+    let isValid = validationFormFieldsCreation();
     if (!isValid) {
+      console.log("NOT validdd");
       return;
     }
+    console.log("validdd");
 
     // Consume the creation service
     fetch('/api/admin/sadmin/admin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`,
+        'Authorization': `Bearer ${TOKEN}`,
       },
       body: JSON.stringify({ phoneNumber, email, firstName, lastName })
     })
       .then(res => res.text())
-      .then(data => {        
+      .then(data => {
+        console.log("data: ", data);
         // Switch to handle errors messages 
-        switch(data){
+        switch (data) {
           case "Unauthorized":
             setLoginError('Admin Unauthorized.');
             break;
-          case "Admin Exists Already":
+          case "Admin Exists Already without set up":
+            setShowSetUpFields(true);
             setLoginError('The admin already exists. Please fill out the passwords to finish the set up.');
+            break;
+          case "Admin Exists Already with set up":
+            setLoginError('The admin already exists and has done the set up.');
+            break;
+          case "Email and Phone Separate":
+            setLoginError('The email and phone number are associated with different existing accounts.');
+            break;
+          case "Admin already exists with a different phone number":
+            setLoginError('The admin already exists with a different phone number.');
+            break;
+          case "Phone number already exists with a different email":
+            setLoginError('The phone number already exists with a different email.');
             break;
           default:
             setLoginError('');
@@ -132,13 +150,11 @@ function Register() {
       })
       .then(data => {
         if (!data.message) {
-          setLoginError('');
-          // Store the accessToken in local storage
-          localStorage.setItem('accessToken', data.accessToken);
-          navigate("/admin/dashboard");
-        } else {      
+          setLoginError('');                    
+          navigate("/admin/admins");
+        } else {
           // Switch to handle errors messages 
-          switch(data.message){
+          switch (data.message) {
             case "Unauthorized":
               setLoginError('Admin Unauthorized.');
               break;
@@ -148,19 +164,14 @@ function Register() {
             case "Wrong Password":
               setLoginError('The One Time Password is incorrect.');
           }
-        } 
+        }
 
-        
+
       })
       .catch((error) => {
         console.error('Error:', error);
         // Handle error
       });
-  };
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    navigate("/login");
   };
 
   // Validation functions
@@ -242,16 +253,17 @@ function Register() {
 
   return (
     <>
-      <AuthHeader
+      {/* <AuthHeader
         title="Create an account"
         lead=""
-      />
-      <Container className="mt--8 pb-5">
+      /> */}
+      <SimpleHeader name="Register" parentName="" />
+      <Container className="mt--6 pb-5">
         <Row className="justify-content-center">
           <Col lg="6" md="8">
             <Card className="bg-secondary border-0">
               <CardBody className="px-lg-5 py-lg-5">
-                <div className="text-centermb-3">
+                <div className="text-center mb-3">
                   {/* Salespotter image */}
                   <img
                     alt="Descriptive alt text"
@@ -266,7 +278,7 @@ function Register() {
                       {loginError}
                     </Alert>
                   </div>
-                )}                
+                )}
                 <Form role="form">
                   {/* First name */}
                   <FormGroup
@@ -430,20 +442,10 @@ function Register() {
                   {/* Create button */}
                   <div className="text-center mb-2">
                     <Button className="mt-4" color="info" type="button" onClick={!showSetUpFields ? handleCreate : handleSetUp} style={{ backgroundColor: "#1B2A72", borderColor: '#21338a' }}>
-                      {!showSetUpFields ? "Create account" : "Set Up Account and Log In"}
+                      {!showSetUpFields ? "Create account" : "Set Up Account"}
                     </Button>
                   </div>
                 </Form>
-                <div className="text-center">
-                  <a
-                    className="text-light"            
-                    href="#"        
-                    onClick={(e) => handleLogin(e)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <small>Already have an account? Go to Login</small>
-                  </a>
-                </div>
               </CardBody>
             </Card>
           </Col>

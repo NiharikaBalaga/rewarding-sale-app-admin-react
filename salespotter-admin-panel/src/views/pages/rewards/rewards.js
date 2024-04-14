@@ -144,7 +144,8 @@ function Rewards() {
                     dataField: "name",
                     text: "Name",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row, rowIndex) => (
                       <div>
                         <b>{`${row.firstName} ${row.lastName}`}</b>
@@ -155,7 +156,8 @@ function Rewards() {
                     dataField: "productName",
                     text: "Product name",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row, rowIndex) => (
                       <div>
                         <img
@@ -172,12 +174,14 @@ function Rewards() {
                     dataField: showUsersPoints ? "points" : "post_points",
                     text: "Points",
                     sort: true,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                   ...!showUsersPoints ? [{
                     dataField: "actions",
                     text: "Actions",
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                     formatter: (cell, row) => (
                       <div>
                         <a
@@ -217,7 +221,8 @@ function Rewards() {
                       );
                     },
                     sort: false,
-                    classes: "vertical-align-middle",
+                    headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                   },
                 ]}
                 search

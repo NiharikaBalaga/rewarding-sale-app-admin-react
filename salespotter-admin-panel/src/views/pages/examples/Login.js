@@ -64,7 +64,6 @@ function Login() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPER_ADMIN_TOKEN}`,
       },
       body: JSON.stringify({ email, password, superAdmin: false })
     })
@@ -79,14 +78,35 @@ function Login() {
         }
       })
       .then(data => {
+        console.log("handleLogin: ", data);
+        console.log("handleLogin: ", data.message);
         if (data.accessToken) {
           // Store the accessToken in local storage
           localStorage.setItem('accessToken', data.accessToken);
           localStorage.setItem('fullName', data.fullName);
+          localStorage.setItem('superAdmin', data.superAdmin);
           navigate("/admin/dashboard");
         } else {
-          console.log("login unsuccessful");
-          setLoginError('Login unsuccessful. Please try again.');
+          switch (data.message) {
+            case "Unauthorized":
+              setLoginError('Admin Unauthorized');
+              break;
+            case "Admin email does not exist":
+              setLoginError('Invalid credentials.');
+              break;
+            case "Your account have been blocked":
+              setLoginError('Your account have been blocked');
+              break;
+            case "Please Setup Account Before Login":
+              setLoginError('Please Setup Account Before Login.');
+              break;
+            case "Wrong Password":
+              setLoginError('Invalid credentials.');
+              break;
+            default:
+              setLoginError('Login unsuccessful. Please try again.');
+          }
+
         }
       })
       .catch((error) => {
@@ -135,7 +155,7 @@ function Login() {
     <>
       <AuthHeader
         title="Welcome!"
-        lead=""
+        lead="Login as an Admin"
         style={{ paddingTop: "50px" }}
       />
       <Container className="mt--8 pb-5">
@@ -218,8 +238,8 @@ function Login() {
                 </Form>
                 <div className="text-center">
                   <a
-                    className="text-light"         
-                    href="#"           
+                    className="text-light"
+                    href="#"
                     onClick={(e) => handleSuperAdminLogin(e)}
                     style={{ cursor: 'pointer' }}
                   >
