@@ -45,6 +45,7 @@ import {
 } from "reactstrap";
 
 function AdminNavbar({ theme, sidenavOpen, toggleSidenav }) {
+  const ADMIN_NAME = localStorage.getItem('fullName');
   // function that on mobile devices makes the search open
   const openSearch = () => {
     document.body.classList.add("g-navbar-search-showing");
@@ -87,7 +88,7 @@ function AdminNavbar({ theme, sidenavOpen, toggleSidenav }) {
           <Collapse navbar isOpen={true}>                       
             <Nav className="align-items-center ml-auto ml-md-0 p-2" navbar>              
               <span className="mb-0 text-white fst-italic h2" style={{ letterSpacing: '0.1em' }}>
-                Michael Watson
+                Welcome, {ADMIN_NAME}
               </span>
             </Nav>
           </Collapse>

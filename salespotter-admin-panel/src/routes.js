@@ -25,6 +25,7 @@ import AdminEdit from "views/pages/admins/admin-edit";
 import Rewards from "views/pages/rewards/rewards";
 import RewardsEdit from "views/pages/rewards/rewards-edit";
 import React from 'react';
+import Register from "views/pages/examples/Register";
 
 const routes = [
   {  
@@ -100,6 +101,14 @@ const routes = [
     layout: "/admin",
     showInSidebar: false,
   },  
+  {
+    path: "/register",
+    name: "Register",
+    icon: "ni ni-ui-04 text-primary",
+    component: <Register />,
+    layout: "/admin",
+    showInSidebar: false,
+  }, 
 ];
 
 export default routes;

@@ -95,7 +95,7 @@ function Users() {
     loadData();
   }, []);   
 
-  const blockUser = (userId) => {
+  const blockUser = (userId, isBlocked) => {
     console.log("userId: ", userId);
     fetch('/api/admin/user/block', {
       method: 'PUT',
@@ -103,7 +103,7 @@ function Users() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${TOKEN}`,
       },
-      body: JSON.stringify({ userId: userId })
+      body: JSON.stringify({ userId, blockUser: !isBlocked })
     })
     .then(response => response.json())
     .then(data => {
@@ -136,7 +136,8 @@ function Users() {
                               dataField: "name",
                               text: "Name",
                               sort: true,
-                              classes: "vertical-align-middle",
+                              headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                               formatter: (cell, row, rowIndex) => (
                                 <div>                                  
                                   <b>{`${row.firstName} ${row.lastName}`}</b>
@@ -148,22 +149,24 @@ function Users() {
                                 dataField: "email",
                                 text: "Email address",
                                 sort: true,
-                                classes: "vertical-align-middle",
+                                headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                             },
                             /* Phone number */
                             {
                                 dataField: "phoneNumber",
                                 text: "Phone number",
                                 sort: true,
-                                classes: "vertical-align-middle",
+                                headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                             },
                             /* Created at */
                             {
                               dataField: "createdAt",
                               text: "Created at",
-                              sort: true,
-                              classes: "vertical-align-middle",
-                              classes: "vertical-align-middle",
+                              sort: true,                              
+                              headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                               formatter: (cell, row) => {                                
                                 const dateObj = new Date(cell);
                                 // Converts to YYYY-MM-DD format
@@ -176,7 +179,8 @@ function Users() {
                               dataField: "status",
                               text: "Status",                              
                               sort: true,
-                              classes: "vertical-align-middle",
+                              headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                               formatter: (cell, row) => {
                                 // Determine the badge class based on the signedUp field's value
                                 const badgeClass = !row.isBlocked ? "bg-success" : "bg-danger";
@@ -198,23 +202,24 @@ function Users() {
                             {
                                 dataField: "actions",
                                 text: "Actions",
-                                classes: "vertical-align-middle",
+                                headerClasses: "text-center",                    
+                    classes: "vertical-align-middle text-center",
                                 formatter: (cell, row) => (
                                     <div>                                    
                                     {/* Block user icon */}
                                     <a
                                     className="table-action table-action-delete"
                                     href="#pablo"
-                                    id="tooltip601065235"
+                                    id={`block-tooltip-${row._id}`}
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      blockUser(row._id);
+                                      blockUser(row._id, row.isBlocked);
                                     }}
                                     >
-                                        <i className="fas fa-ban" />
+                                        <i className={row.isBlocked ? "fas fa-unlock" : "fas fa-ban"} />
                                     </a>
-                                    <UncontrolledTooltip delay={0} target="tooltip601065235">
-                                        Block user
+                                    <UncontrolledTooltip delay={0} target={`block-tooltip-${row._id}`}>
+                                      {row.isBlocked ? "Unblock user" : "Block user"}
                                     </UncontrolledTooltip>                                    
                                     </div>
                                 )

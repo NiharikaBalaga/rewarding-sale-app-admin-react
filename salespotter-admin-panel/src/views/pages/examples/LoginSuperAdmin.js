@@ -38,7 +38,7 @@ import AuthHeader from "components/Headers/AuthHeader.js";
 import { Alert } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function LoginSuperAdmin() {
   const SUPER_ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjE3NjQ5MGQyODk0ZDMyOGY0MDk3OTgiLCJwaG9uZU51bWJlciI6IjQzNy01NTYtMjk0OCIsImlhdCI6MTcxMjk2MDE2NSwiZXhwIjoxNzEyOTYzNzY1fQ.7AJc_t-4VskzNqW1whBocs1di-6OAnwK747wTFwhoyI";
   const navigate = useNavigate();
   // focused states
@@ -63,9 +63,9 @@ function Login() {
     fetch('/api/admin/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email, password, superAdmin: false })
+      body: JSON.stringify({ email, password, superAdmin: true })
     })
       .then(response => {
         // Checks if the answer is JSON before trying to analyze it
@@ -78,8 +78,6 @@ function Login() {
         }
       })
       .then(data => {
-        console.log("handleLogin: ", data);
-        console.log("handleLogin: ", data.message);
         if (data.accessToken) {
           // Store the accessToken in local storage
           localStorage.setItem('accessToken', data.accessToken);
@@ -87,26 +85,8 @@ function Login() {
           localStorage.setItem('superAdmin', data.superAdmin);
           navigate("/admin/dashboard");
         } else {
-          switch (data.message) {
-            case "Unauthorized":
-              setLoginError('Admin Unauthorized');
-              break;
-            case "Admin email does not exist":
-              setLoginError('Invalid credentials.');
-              break;
-            case "Your account have been blocked":
-              setLoginError('Your account have been blocked');
-              break;
-            case "Please Setup Account Before Login":
-              setLoginError('Please Setup Account Before Login.');
-              break;
-            case "Wrong Password":
-              setLoginError('Invalid credentials.');
-              break;
-            default:
-              setLoginError('Login unsuccessful. Please try again.');
-          }
-
+          console.log("login unsuccessful");
+          setLoginError('Login unsuccessful. Please try again.');
         }
       })
       .catch((error) => {
@@ -115,9 +95,9 @@ function Login() {
       });
   };
 
-  const handleSuperAdminLogin = (e) => {
+  const handleAdminLogin = (e) => {
     e.preventDefault();
-    navigate("/login-super-admin");
+    navigate("/login-admin", { state: { superAdminToken: SUPER_ADMIN_TOKEN } });
   };
 
   // Validation functions
@@ -155,7 +135,7 @@ function Login() {
     <>
       <AuthHeader
         title="Welcome!"
-        lead="Login as an Admin"
+        lead="Login as an Super Admin"
         style={{ paddingTop: "50px" }}
       />
       <Container className="mt--8 pb-5">
@@ -196,7 +176,7 @@ function Login() {
                       <Input
                         placeholder="Email"
                         type="email"
-                        name="email_admin_login"
+                        name="email_super_admin_login"
                         onFocus={() => setfocusedEmail(true)}
                         onBlur={() => setfocusedEmail(true)}
                         value={email}
@@ -221,7 +201,7 @@ function Login() {
                       <Input
                         placeholder="Password"
                         type="password"
-                        name="password_admin_login"
+                        name="password_super_admin_login"
                         onFocus={() => setfocusedPassword(true)}
                         onBlur={() => setfocusedPassword(true)}
                         value={password}
@@ -238,12 +218,12 @@ function Login() {
                 </Form>
                 <div className="text-center">
                   <a
-                    className="text-light"
-                    href="#"
-                    onClick={(e) => handleSuperAdminLogin(e)}
+                    className="text-light"         
+                    href="#"           
+                    onClick={(e) => handleAdminLogin(e)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <small>Not an admin? Go to the Super Admin Login</small>
+                    <small>Not a super admin? Go to the Admin Login</small>
                   </a>
                 </div>
               </CardBody>
@@ -255,4 +235,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default LoginSuperAdmin;

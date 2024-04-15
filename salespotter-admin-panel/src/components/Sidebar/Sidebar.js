@@ -36,10 +36,11 @@ import {
 
 function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
   const TOKEN = localStorage.getItem('accessToken');
+  const SUPER_ADMIN = localStorage.getItem('superAdmin') === 'true';
 
   const [state, setState] = React.useState({});
   const location = useLocation();
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
   React.useEffect(() => {
     setState(getCollapseStates(routes));
     // eslint-disable-next-line
@@ -245,7 +246,7 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
                 to="/admin/users" tag={Link}
               >
                 <i className="ni ni-single-02 text-primary" />
-                <span className="nav-link-text">User</span>
+                <span className="nav-link-text">Users</span>
               </NavLink>
             </NavItem>
             <NavItem>
@@ -261,17 +262,25 @@ function Sidebar({ toggleSidenav, sidenavOpen, routes, logo, rtlActive }) {
                 to="/admin/posts" tag={Link}
               >
                 <i className="ni ni-calendar-grid-58 text-primary" />
-                <span className="nav-link-text">Post</span>
+                <span className="nav-link-text">Posts</span>
               </NavLink>
             </NavItem>
-            <NavItem>
-              <NavLink
-                to="/admin/admins" tag={Link}
-              >
-                <i className="ni ni-ui-04 text-primary" />
-                <span className="nav-link-text">Super Admin</span>
-              </NavLink>
-            </NavItem>
+            {SUPER_ADMIN && (
+              <>
+                <NavItem>
+                  <NavLink to="/admin/admins" tag={Link}>
+                    <i className="ni ni-ui-04 text-primary" />
+                    <span className="nav-link-text">Admins</span>
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink to="/admin/register" tag={Link}>
+                    <i className="ni ni-ui-04 text-primary" />
+                    <span className="nav-link-text">Register an Admin</span>
+                  </NavLink>
+                </NavItem>
+              </>
+            )}
             <NavItem>
               <NavLink href="#" onClick={handleLogout}>
                 <i className="fas fa-sign-out-alt text-primary" />
